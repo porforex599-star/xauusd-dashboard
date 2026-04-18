@@ -8,29 +8,41 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root {
-  --bg0: #080808;
-  --bg1: #0f0f0f;
-  --bg2: #141414;
-  --bg3: #1a1a1a;
-  --bg4: #222;
-  --gold: #C9A84C;
-  --gold2: #E8C87A;
-  --gold3: #F5DFA0;
-  --gold-dim: rgba(201,168,76,0.12);
-  --gold-line: rgba(201,168,76,0.25);
-  --text: #F0EDE6;
-  --text2: #9A9080;
-  --text3: #5A5348;
-  --green: #4CAF72;
-  --red: #E05252;
+  --bg0: #03031a;
+  --bg1: rgba(18, 18, 56, 0.55);
+  --bg2: rgba(28, 28, 80, 0.55);
+  --bg3: rgba(40, 40, 110, 0.6);
+  --bg4: rgba(80, 80, 160, 0.25);
+  --gold: #FFD369;
+  --gold2: #FFE29A;
+  --gold3: #FFF4C9;
+  --gold-dim: rgba(255,211,105,0.12);
+  --gold-line: rgba(255,211,105,0.3);
+  --cyan: #00E5FF;
+  --cyan-dim: rgba(0,229,255,0.15);
+  --cyan-line: rgba(0,229,255,0.35);
+  --purple: #B14DFF;
+  --purple-dim: rgba(177,77,255,0.15);
+  --purple-line: rgba(177,77,255,0.35);
+  --pink: #FF4DB8;
+  --text: #E8ECFF;
+  --text2: #9AA3D4;
+  --text3: #5A6199;
+  --green: #3DFFA8;
+  --red: #FF5E7A;
   --blue: #5B9CF6;
-  --border: rgba(201,168,76,0.1);
-  --border2: rgba(201,168,76,0.2);
-  --radius: 2px;
+  --border: rgba(120, 140, 230, 0.15);
+  --border2: rgba(120, 140, 230, 0.3);
+  --radius: 6px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: var(--bg0);
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(177,77,255,0.18), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 10%, rgba(0,229,255,0.15), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255,77,184,0.12), transparent 55%),
+    linear-gradient(180deg, #03031a 0%, #05052a 50%, #03031a 100%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
@@ -38,17 +50,49 @@ body {
   overflow-x: hidden;
 }
 
-/* Subtle grid bg */
+/* Star field */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+    radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 60% 70%, #E8ECFF, transparent),
+    radial-gradient(1px 1px at 40% 90%, #fff, transparent),
+    radial-gradient(1px 1px at 80% 20%, #B14DFF, transparent),
+    radial-gradient(1px 1px at 15% 60%, #00E5FF, transparent),
+    radial-gradient(1px 1px at 90% 80%, #fff, transparent),
+    radial-gradient(1px 1px at 50% 40%, #E8ECFF, transparent),
+    radial-gradient(2px 2px at 75% 50%, #fff, transparent),
+    radial-gradient(1px 1px at 30% 15%, #fff, transparent),
+    radial-gradient(1px 1px at 65% 25%, #FFD369, transparent);
+  background-size: 200px 200px, 250px 250px, 180px 180px, 300px 300px, 220px 220px, 270px 270px, 190px 190px, 350px 350px, 210px 210px, 280px 280px;
+  background-repeat: repeat;
   pointer-events: none;
   z-index: 0;
+  opacity: 0.7;
+  animation: starDrift 180s linear infinite;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 85% 15%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 45% 65%, rgba(255,211,105,0.7), transparent);
+  background-size: 320px 320px, 400px 400px, 500px 500px;
+  pointer-events: none;
+  z-index: 0;
+  animation: twinkle 4s ease-in-out infinite;
+}
+@keyframes starDrift {
+  0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  100% { background-position: 200px 400px, -250px 500px, 180px -360px, -300px 600px, 220px -440px, -270px 540px, 190px -380px, 350px -700px, -210px 420px, 280px -560px; }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
 }
 
 .app { position: relative; z-index: 1; }
