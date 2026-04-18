@@ -218,6 +218,38 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'H
     <div id="pos-list"><div class="no-pos">รอข้อมูลจาก MT5...</div></div>
   </div>
 
+  <!-- Trade History Section -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">ประวัติการเทรด</div>
+
+    <!-- Stats Cards -->
+    <div id="stats-cards" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px;"></div>
+
+    <!-- History Table -->
+    <div id="history-section" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="border-bottom:0.5px solid var(--color-border-tertiary);">
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">เวลาเปิด</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">ทิศทาง</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Strategy</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Lot</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">ราคาเปิด → ปิด</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Pips</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">P&L</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Conf</th>
+              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">ผล / Session</th>
+            </tr>
+          </thead>
+          <tbody id="history-table">
+            <tr><td colspan="9" style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <div class="footer" id="footer">ยังไม่ได้รับข้อมูล — รัน adaptive_ai_server.py และ MT5 EA ก่อน</div>
 </div>
 
@@ -356,3 +388,95 @@ setInterval(poll, 3000);
 </script>
 </body>
 </html>
+
+<script>
+// ===== TRADE HISTORY SECTION =====
+const STATS_URL = "https://xauusd-bridge-production.up.railway.app/stats?symbol=XAUUSD.cent";
+
+const stratIcon = { SCALP: "S", INTRADAY: "I", SWING: "SW", TREND_FOLLOW: "TF", RECOVERY: "RC", UNKNOWN: "?" };
+const stratColor = { SCALP: "#854F0B", INTRADAY: "#185FA5", SWING: "#534AB7", TREND_FOLLOW: "#0F6E56", RECOVERY: "#993C1D", UNKNOWN: "#888" };
+const stratBg   = { SCALP: "#FAEEDA", INTRADAY: "#E6F1FB", SWING: "#EEEDFE", TREND_FOLLOW: "#E1F5EE", RECOVERY: "#FAECE7", UNKNOWN: "#F1EFE8" };
+
+function fmtPnl(n) { return (n >= 0 ? '+$' : '-$') + Math.abs(n).toFixed(2); }
+function fmtTime(s) {
+  if(!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('th-TH', {month:'short', day:'numeric'}) + ' ' + d.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+}
+
+async function loadHistory() {
+  try {
+    const r = await fetch(STATS_URL);
+    const data = await r.json();
+    renderStats(data);
+    renderHistory(data.trades || []);
+  } catch(e) {
+    document.getElementById('history-section').innerHTML = '<p style="color:var(--color-text-secondary);font-size:13px;padding:1rem;">ยังไม่มีประวัติการเทรด — รอ Trade แรกปิดครับ</p>';
+  }
+}
+
+function renderStats(data) {
+  const el = document.getElementById('stats-cards');
+  if(!el) return;
+  const wr = data.win_rate || 0;
+  const wrColor = wr >= 60 ? '#3B6D11' : wr >= 40 ? '#854F0B' : '#A32D2D';
+  el.innerHTML = `
+    <div style="background:var(--color-background-secondary);border-radius:8px;padding:14px;">
+      <div style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Trade ทั้งหมด</div>
+      <div style="font-size:22px;font-weight:500;color:var(--color-text-primary);">${data.total || 0}</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:8px;padding:14px;">
+      <div style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Win Rate</div>
+      <div style="font-size:22px;font-weight:500;color:${wrColor};">${wr.toFixed(1)}%</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);">${data.wins||0}W / ${data.losses||0}L</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:8px;padding:14px;">
+      <div style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">กำไรรวม</div>
+      <div style="font-size:22px;font-weight:500;color:${(data.total_profit||0)>=0?'#3B6D11':'#A32D2D'};">${fmtPnl(data.total_profit||0)}</div>
+    </div>`;
+}
+
+function renderHistory(trades) {
+  const el = document.getElementById('history-table');
+  if(!el || trades.length === 0) {
+    if(el) el.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">ยังไม่มีประวัติ รอ Trade แรกปิด</td></tr>';
+    return;
+  }
+
+  el.innerHTML = trades.map(t => {
+    const win = t.win;
+    const pnl = t.profit || 0;
+    const pips = t.pips || 0;
+    const strat = t.strategy || 'UNKNOWN';
+    const conf = t.confidence || 0;
+    const confColor = conf >= 75 ? '#3B6D11' : conf >= 50 ? '#854F0B' : '#A32D2D';
+    const session = t.session || '—';
+    const sessColor = session === 'London' ? '#185FA5' : session === 'New York' ? '#534AB7' : session === 'Asian' ? '#0F6E56' : '#888';
+
+    return `<tr style="border-bottom:0.5px solid var(--color-border-tertiary);">
+      <td style="padding:8px;font-size:12px;color:var(--color-text-secondary);">${fmtTime(t.open_time)}</td>
+      <td style="padding:8px;">
+        <span style="font-size:11px;font-weight:500;color:${t.type==='BUY'?'#3B6D11':'#A32D2D'}">${t.type||'—'}</span>
+      </td>
+      <td style="padding:8px;">
+        <span style="font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;background:${stratBg[strat]||'#F1EFE8'};color:${stratColor[strat]||'#888'}">${strat}</span>
+      </td>
+      <td style="padding:8px;font-size:12px;color:var(--color-text-secondary);">${(t.lots||0).toFixed(2)}</td>
+      <td style="padding:8px;font-size:12px;color:var(--color-text-secondary);">${(t.open_price||0).toFixed(2)} → ${(t.close_price||0).toFixed(2)}</td>
+      <td style="padding:8px;font-size:12px;color:${pips>=0?'#3B6D11':'#A32D2D'};font-weight:500;">${pips>=0?'+':''}${pips.toFixed(1)}</td>
+      <td style="padding:8px;font-size:12px;color:${pnl>=0?'#3B6D11':'#A32D2D'};font-weight:500;">${fmtPnl(pnl)}</td>
+      <td style="padding:8px;">
+        <span style="font-size:11px;font-weight:500;color:${confColor}">${conf}%</span>
+      </td>
+      <td style="padding:8px;">
+        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:${win?'#EAF3DE':'#FCEBEB'};color:${win?'#27500A':'#791F1F'};font-weight:500">${win?'WIN':'LOSS'}</span>
+        <div style="font-size:10px;color:${sessColor};margin-top:2px">${session}</div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// Load history on start and every 30 seconds
+loadHistory();
+setInterval(loadHistory, 30000);
+</script>
