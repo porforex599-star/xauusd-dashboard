@@ -3,370 +3,736 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adaptive AI — XAUUSD</title>
+<title>XAUUSD AI — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root {
-  --bg: #0a0a0a; --bg2: #141414; --bg3: #1c1c1c; --bg4: #222;
-  --border: rgba(255,255,255,0.06);
-  --text: #efefef; --muted: #666;
-  --gold: #D4AF37; --gold2: #f0d870;
-  --green: #4ade80; --red: #f87171; --blue: #60a5fa; --amber: #fbbf24;
-  --purple: #a78bfa;
-  --radius: 12px;
+  --bg0: #080808;
+  --bg1: #0f0f0f;
+  --bg2: #141414;
+  --bg3: #1a1a1a;
+  --bg4: #222;
+  --gold: #C9A84C;
+  --gold2: #E8C87A;
+  --gold3: #F5DFA0;
+  --gold-dim: rgba(201,168,76,0.12);
+  --gold-line: rgba(201,168,76,0.25);
+  --text: #F0EDE6;
+  --text2: #9A9080;
+  --text3: #5A5348;
+  --green: #4CAF72;
+  --red: #E05252;
+  --blue: #5B9CF6;
+  --border: rgba(201,168,76,0.1);
+  --border2: rgba(201,168,76,0.2);
+  --radius: 2px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Helvetica Neue', sans-serif; font-size: 14px; min-height: 100vh; }
-
-/* Topbar */
-.topbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand-icon { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #c9a227, #f0d870); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #111; }
-.brand-name { font-size: 15px; font-weight: 600; }
-.brand-sub { font-size: 11px; color: var(--muted); }
-.conn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
-.dot { width: 7px; height: 7px; border-radius: 50%; background: #333; }
-.dot.live { background: var(--green); animation: blink 2s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-/* Layout */
-.main { padding: 20px 24px; max-width: 1280px; margin: 0 auto; }
-
-/* AI Brain Panel */
-.ai-brain {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 16px;
-  display: grid;
-  grid-template-columns: 200px 1fr 1fr 1fr;
-  gap: 20px;
-  align-items: start;
+body {
+  background: var(--bg0);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
-.ai-signal-block { text-align: center; border-right: 1px solid var(--border); padding-right: 20px; }
-.ai-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-.ai-signal { font-size: 38px; font-weight: 700; letter-spacing: 3px; }
+
+/* Subtle grid bg */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; }
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,8,8,0.95);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 28px; height: 28px;
+  border: 1px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 500;
+  color: var(--text);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.brand-sub { font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.header-right { display: flex; align-items: center; gap: 20px; }
+.live-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: var(--text2);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: #555; }
+.live-dot.on { background: var(--green); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
+.price-display { font-family: 'DM Mono', monospace; font-size: 18px; color: var(--gold2); font-weight: 400; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg0);
+}
+.tab {
+  padding: 14px 24px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* Main */
+.main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Metric cards */
+.metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 24px; }
+.metric {
+  background: var(--bg1);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.metric::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-line), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.metric:hover::before { opacity: 1; }
+.metric-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.metric-val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 400; color: var(--text); line-height: 1; }
+.metric-sub { font-size: 10px; color: var(--text3); margin-top: 6px; }
+.gold-val { color: var(--gold2); }
+.green-val { color: var(--green); }
+.red-val { color: var(--red); }
+
+/* AI Panel */
+.ai-panel {
+  display: grid;
+  grid-template-columns: 220px 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.ai-signal-block {
+  background: var(--bg1);
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.ai-signal-block::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-line), transparent);
+}
+.signal-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+.signal-val { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 300; line-height: 1; letter-spacing: 4px; }
 .sig-buy { color: var(--green); }
 .sig-sell { color: var(--red); }
-.sig-wait { color: var(--muted); }
-.ai-strategy-badge {
-  display: inline-block; margin-top: 6px;
-  font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; letter-spacing: 1px;
+.sig-wait { color: var(--text3); }
+.strategy-tag {
+  display: inline-block;
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 12px;
+  border: 1px solid var(--gold-line);
+  color: var(--gold);
+  margin-top: 10px;
 }
-.strat-scalp { background: rgba(251,191,36,0.15); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
-.strat-intraday { background: rgba(96,165,250,0.15); color: var(--blue); border: 1px solid rgba(96,165,250,0.3); }
-.strat-swing { background: rgba(167,139,250,0.15); color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
-.strat-wait { background: rgba(100,100,100,0.1); color: var(--muted); border: 1px solid rgba(100,100,100,0.2); }
+.conf-row { margin-top: 14px; }
+.conf-num { font-family: 'DM Mono', monospace; font-size: 28px; color: var(--gold2); }
+.conf-bar-bg { height: 2px; background: var(--bg4); margin-top: 8px; }
+.conf-bar { height: 2px; background: var(--gold); transition: width 0.5s; }
+.signal-time { font-size: 10px; color: var(--text3); margin-top: 10px; font-family: 'DM Mono', monospace; }
 
-.ai-detail-block {}
-.ai-detail-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
-.ai-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
-.ai-row:last-child { border-bottom: none; }
-.ai-row-label { color: var(--muted); }
-.ai-row-val { font-weight: 500; }
+.ai-detail { background: var(--bg1); padding: 24px; }
+.detail-title { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+.detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.detail-row:last-child { border-bottom: none; }
+.d-label { font-size: 11px; color: var(--text3); }
+.d-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); }
 
-.ai-reasoning {
-  background: rgba(255,255,255,0.03);
+.ai-reasoning-block { background: var(--bg1); padding: 24px; }
+.reasoning-text { font-size: 12px; color: var(--text2); line-height: 1.8; font-style: italic; border-left: 2px solid var(--gold-line); padding-left: 14px; }
+
+/* Grid 2 col */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+/* Card */
+.card {
+  background: var(--bg1);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 12px;
-  line-height: 1.7;
-  color: #bbb;
+  padding: 24px;
 }
-.ai-reasoning-title { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.card-title { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 18px; }
 
-/* Confidence bar */
-.conf-bar-wrap { margin-top: 8px; }
-.conf-bar-bg { background: var(--bg3); border-radius: 4px; height: 4px; overflow: hidden; }
-.conf-bar-fill { height: 4px; border-radius: 4px; transition: width 0.5s; }
-
-/* Metrics */
-.metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
-.metric { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
-.metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
-.metric-val { font-size: 20px; font-weight: 600; }
-.metric-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
-.up { color: var(--green); } .down { color: var(--red); } .gold { color: var(--gold); }
-
-/* Grid */
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
-.card-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+/* Indicators */
+.ind-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.ind-row:last-child { border-bottom: none; }
+.ind-name { font-size: 11px; color: var(--text3); }
+.ind-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); }
+.tag { font-size: 9px; letter-spacing: 1px; padding: 2px 8px; text-transform: uppercase; }
+.tag-bull { background: rgba(76,175,114,0.1); color: var(--green); border: 1px solid rgba(76,175,114,0.2); }
+.tag-bear { background: rgba(224,82,82,0.1); color: var(--red); border: 1px solid rgba(224,82,82,0.2); }
+.tag-neu  { background: rgba(90,83,72,0.3); color: var(--text3); border: 1px solid rgba(90,83,72,0.4); }
+.tag-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-line); }
 
 /* Chart */
 .chart-wrap { position: relative; width: 100%; height: 200px; }
 
 /* Positions */
-.pos-item { background: var(--bg3); border-radius: 8px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.pos-item {
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg2);
+  transition: border-color 0.2s;
+}
+.pos-item:hover { border-color: var(--gold-line); }
 .pos-item:last-child { margin-bottom: 0; }
-.pos-type { font-size: 12px; font-weight: 700; letter-spacing: 1px; }
-.pos-info { font-size: 11px; color: var(--muted); margin-top: 3px; }
-.pos-strat { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; }
-.pos-pnl { font-size: 18px; font-weight: 700; }
-.no-pos { text-align: center; color: var(--muted); font-size: 13px; padding: 24px; }
+.pos-type { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 1px; }
+.pos-info { font-size: 10px; color: var(--text3); margin-top: 3px; font-family: 'DM Mono', monospace; }
+.pos-pnl { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 400; }
+.no-pos { text-align: center; padding: 32px; color: var(--text3); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
 
-/* Ind table */
-.ind-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-.ind-row:last-child { border-bottom: none; }
-.ind-name { font-size: 13px; color: var(--muted); }
-.ind-right { display: flex; align-items: center; gap: 8px; }
-.ind-val { font-size: 13px; font-weight: 500; }
-.pill { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
-.p-bull { background: rgba(74,222,128,0.12); color: var(--green); }
-.p-bear { background: rgba(248,113,113,0.12); color: var(--red); }
-.p-neu  { background: rgba(100,100,100,0.12); color: var(--muted); }
-.p-warn { background: rgba(251,191,36,0.12); color: var(--amber); }
+/* History table */
+.hist-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.hist-table th {
+  text-align: left; padding: 10px 12px;
+  font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text3); font-weight: 400;
+  border-bottom: 1px solid var(--border2);
+}
+.hist-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+.hist-table tr:hover td { background: rgba(201,168,76,0.03); }
+.strat-tag {
+  font-size: 9px; padding: 2px 8px; letter-spacing: 1px; text-transform: uppercase;
+  border: 1px solid;
+}
+.st-scalp    { color: #E8A030; border-color: rgba(232,160,48,0.3); background: rgba(232,160,48,0.08); }
+.st-intraday { color: var(--blue); border-color: rgba(91,156,246,0.3); background: rgba(91,156,246,0.08); }
+.st-swing    { color: #B088F0; border-color: rgba(176,136,240,0.3); background: rgba(176,136,240,0.08); }
+.st-recovery { color: var(--red); border-color: rgba(224,82,82,0.3); background: rgba(224,82,82,0.08); }
+.st-trend    { color: var(--green); border-color: rgba(76,175,114,0.3); background: rgba(76,175,114,0.08); }
+.win-tag { font-size: 9px; padding: 2px 8px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid; }
+.win-yes { color: var(--green); border-color: rgba(76,175,114,0.3); background: rgba(76,175,114,0.08); }
+.win-no  { color: var(--red); border-color: rgba(224,82,82,0.3); background: rgba(224,82,82,0.08); }
 
-.footer { text-align: center; font-size: 11px; color: var(--muted); padding: 16px; border-top: 1px solid var(--border); margin-top: 8px; }
+/* Analytics */
+.analytics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 24px; }
+.analytics-card { background: var(--bg1); padding: 24px; }
+.a-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.a-val { font-family: 'DM Mono', monospace; font-size: 28px; color: var(--text); font-weight: 300; }
+.a-sub { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+/* Footer */
+.footer { text-align: center; padding: 20px; font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; border-top: 1px solid var(--border); margin-top: 8px; }
+
+/* Divider gold */
+.gold-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--gold-line), transparent); margin: 20px 0; }
 
 @media(max-width:900px) {
-  .ai-brain { grid-template-columns: 1fr; }
-  .ai-signal-block { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 16px; }
   .metrics { grid-template-columns: repeat(2,1fr); }
+  .ai-panel { grid-template-columns: 1fr; }
   .grid2 { grid-template-columns: 1fr; }
+  .analytics-grid { grid-template-columns: 1fr 1fr; }
+  .header { padding: 0 16px; }
+  .tabs { padding: 0 16px; }
+  .main { padding: 20px 16px; }
 }
 </style>
 </head>
 <body>
+<div class="app">
 
-<div class="topbar">
-  <div class="brand">
-    <div class="brand-icon">Au</div>
+<!-- Header -->
+<div class="header">
+  <div class="header-brand">
+    <div class="brand-mark">Au</div>
     <div>
-      <div class="brand-name">XAUUSD Adaptive AI</div>
-      <div class="brand-sub">MT5 Real-time Bridge — M15</div>
+      <div class="brand-name">Aurum AI</div>
+      <div class="brand-sub">XAUUSD Portfolio Intelligence</div>
     </div>
   </div>
-  <div class="conn">
-    <div class="dot" id="connDot"></div>
-    <span id="connText">กำลังเชื่อมต่อ...</span>
+  <div class="header-right">
+    <div class="price-display" id="h-price">—</div>
+    <div class="live-pill">
+      <div class="live-dot" id="live-dot"></div>
+      <span id="live-text">Connecting</span>
+    </div>
   </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">Overview</div>
+  <div class="tab" onclick="switchTab('positions')">Positions</div>
+  <div class="tab" onclick="switchTab('history')">History</div>
+  <div class="tab" onclick="switchTab('analytics')">Analytics</div>
 </div>
 
 <div class="main">
 
-  <!-- AI Brain Panel -->
-  <div class="ai-brain">
-    <div class="ai-signal-block">
-      <div class="ai-label">AI Decision</div>
-      <div class="ai-signal sig-wait" id="ai-signal">WAIT</div>
-      <div class="ai-strategy-badge strat-wait" id="ai-strat">—</div>
-      <div style="margin-top:12px;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Confidence</div>
-        <div style="font-size:20px;font-weight:600;" id="ai-conf">—</div>
-        <div class="conf-bar-wrap">
-          <div class="conf-bar-bg"><div class="conf-bar-fill" id="conf-bar" style="width:0%;background:var(--muted);"></div></div>
-        </div>
-      </div>
-      <div style="margin-top:12px;font-size:11px;color:var(--muted);" id="ai-time">—</div>
-    </div>
-
-    <div class="ai-detail-block">
-      <div class="ai-detail-title">Trade Setup</div>
-      <div class="ai-row"><span class="ai-row-label">Hold Type</span><span class="ai-row-val" id="ai-hold">—</span></div>
-      <div class="ai-row"><span class="ai-row-label">Stop Loss</span><span class="ai-row-val down" id="ai-sl">—</span></div>
-      <div class="ai-row"><span class="ai-row-label">Take Profit</span><span class="ai-row-val up" id="ai-tp">—</span></div>
-      <div class="ai-row"><span class="ai-row-label">R:R Ratio</span><span class="ai-row-val gold" id="ai-rr">—</span></div>
-    </div>
-
-    <div class="ai-detail-block">
-      <div class="ai-detail-title">Market Context</div>
-      <div class="ai-row"><span class="ai-row-label">Condition</span><span class="ai-row-val" id="ai-cond">—</span></div>
-      <div class="ai-row"><span class="ai-row-label">Price</span><span class="ai-row-val gold" id="ai-price">—</span></div>
-      <div class="ai-row"><span class="ai-row-label">Spread</span><span class="ai-row-val" id="ai-spread">—</span></div>
-      <div class="ai-row"><span class="ai-row-label">ATR (14)</span><span class="ai-row-val" id="ai-atr">—</span></div>
-    </div>
-
-    <div>
-      <div class="ai-reasoning-title">AI Reasoning</div>
-      <div class="ai-reasoning" id="ai-reason">รอการวิเคราะห์จาก AI...</div>
-    </div>
-  </div>
+<!-- ===== OVERVIEW TAB ===== -->
+<div class="tab-panel active" id="tab-overview">
 
   <!-- Metrics -->
   <div class="metrics">
-    <div class="metric"><div class="metric-label">Balance</div><div class="metric-val gold" id="m-bal">—</div></div>
-    <div class="metric"><div class="metric-label">Equity</div><div class="metric-val" id="m-eq">—</div></div>
-    <div class="metric"><div class="metric-label">Floating P&L</div><div class="metric-val" id="m-float">—</div></div>
-    <div class="metric"><div class="metric-label">Free Margin</div><div class="metric-val" id="m-margin">—</div></div>
-    <div class="metric"><div class="metric-label">Positions</div><div class="metric-val" id="m-poscount">—</div><div class="metric-sub">XAUUSD</div></div>
+    <div class="metric">
+      <div class="metric-label">Balance</div>
+      <div class="metric-val gold-val" id="m-bal">—</div>
+      <div class="metric-sub">บัญชีรวม</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Equity</div>
+      <div class="metric-val" id="m-eq">—</div>
+      <div class="metric-sub">ทุนปัจจุบัน</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Floating P&L</div>
+      <div class="metric-val" id="m-float">—</div>
+      <div class="metric-sub">กำไร/ขาดทุนลอยตัว</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Free Margin</div>
+      <div class="metric-val" id="m-margin">—</div>
+      <div class="metric-sub">Margin คงเหลือ</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Open Positions</div>
+      <div class="metric-val gold-val" id="m-pos">—</div>
+      <div class="metric-sub">XAUUSD</div>
+    </div>
+  </div>
+
+  <!-- AI Panel -->
+  <div class="ai-panel">
+    <div class="ai-signal-block">
+      <div class="signal-label">AI Decision</div>
+      <div class="signal-val sig-wait" id="sig-val">—</div>
+      <div class="strategy-tag" id="sig-strat">—</div>
+      <div class="conf-row">
+        <div class="conf-num" id="sig-conf">—</div>
+        <div class="conf-bar-bg"><div class="conf-bar" id="conf-bar" style="width:0"></div></div>
+      </div>
+      <div class="signal-time" id="sig-time">—</div>
+    </div>
+
+    <div class="ai-detail">
+      <div class="detail-title">Trade Setup</div>
+      <div class="detail-row"><span class="d-label">Market Condition</span><span class="d-val" id="d-cond">—</span></div>
+      <div class="detail-row"><span class="d-label">Price</span><span class="d-val gold-val" id="d-price">—</span></div>
+      <div class="detail-row"><span class="d-label">Spread</span><span class="d-val" id="d-spread">—</span></div>
+      <div class="detail-row"><span class="d-label">ATR (14)</span><span class="d-val" id="d-atr">—</span></div>
+      <div class="detail-row"><span class="d-label">Session</span><span class="d-val" id="d-session">—</span></div>
+    </div>
+
+    <div class="ai-reasoning-block">
+      <div class="detail-title">AI Reasoning</div>
+      <div class="reasoning-text" id="ai-reason">รอการวิเคราะห์จาก AI...</div>
+    </div>
   </div>
 
   <!-- Chart + Indicators -->
   <div class="grid2">
     <div class="card">
-      <div class="card-title">XAUUSD Price (Live)</div>
+      <div class="card-title">XAUUSD Price — Live</div>
       <div class="chart-wrap">
-        <canvas id="priceChart" role="img" aria-label="XAUUSD live price">XAUUSD price chart</canvas>
+        <canvas id="priceChart" role="img" aria-label="XAUUSD live price chart">XAUUSD price chart</canvas>
       </div>
     </div>
     <div class="card">
-      <div class="card-title">Technical Indicators — M15</div>
-      <div class="ind-row"><span class="ind-name">EMA 20</span><div class="ind-right"><span class="ind-val" id="i-ema20">—</span><span class="pill" id="p-ema20">—</span></div></div>
-      <div class="ind-row"><span class="ind-name">EMA 50</span><div class="ind-right"><span class="ind-val" id="i-ema50">—</span><span class="pill" id="p-ema50">—</span></div></div>
-      <div class="ind-row"><span class="ind-name">RSI (14)</span><div class="ind-right"><span class="ind-val" id="i-rsi">—</span><span class="pill" id="p-rsi">—</span></div></div>
-      <div class="ind-row"><span class="ind-name">ATR (14)</span><div class="ind-right"><span class="ind-val" id="i-atr">—</span><span class="pill p-neu">VOLATILITY</span></div></div>
-      <div class="ind-row"><span class="ind-name">Trend</span><div class="ind-right"><span class="ind-val" id="i-trend">—</span><span class="pill" id="p-trend">—</span></div></div>
+      <div class="card-title">Technical Indicators — M5</div>
+      <div class="ind-row"><span class="ind-name">EMA 20</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-ema20">—</span><span class="tag" id="t-ema20">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">EMA 50</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-ema50">—</span><span class="tag" id="t-ema50">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">RSI (14)</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-rsi">—</span><span class="tag" id="t-rsi">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">ATR (14)</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-atr">—</span><span class="tag tag-neu">VOLATILITY</span></div></div>
+      <div class="ind-row"><span class="ind-name">Trend</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-trend">—</span><span class="tag" id="t-trend">—</span></div></div>
     </div>
   </div>
 
-  <!-- Positions -->
-  <div class="card" style="margin-bottom:14px;">
+</div>
+
+<!-- ===== POSITIONS TAB ===== -->
+<div class="tab-panel" id="tab-positions">
+  <div class="card" style="margin-bottom:24px;">
     <div class="card-title">Open Positions</div>
-    <div id="pos-list"><div class="no-pos">รอข้อมูลจาก MT5...</div></div>
+    <div id="pos-list"><div class="no-pos">ไม่มี Position ที่เปิดอยู่</div></div>
+  </div>
+</div>
+
+<!-- ===== HISTORY TAB ===== -->
+<div class="tab-panel" id="tab-history">
+
+  <!-- Stats -->
+  <div class="metrics" style="margin-bottom:24px;" id="hist-stats">
+    <div class="metric"><div class="metric-label">Trade ทั้งหมด</div><div class="metric-val" id="hs-total">—</div></div>
+    <div class="metric"><div class="metric-label">Win Rate</div><div class="metric-val green-val" id="hs-wr">—</div><div class="metric-sub" id="hs-wl">—</div></div>
+    <div class="metric"><div class="metric-label">กำไรรวม</div><div class="metric-val" id="hs-profit">—</div></div>
+    <div class="metric"><div class="metric-label">Best Strategy</div><div class="metric-val gold-val" id="hs-strat">—</div></div>
+    <div class="metric"><div class="metric-label">Best Session</div><div class="metric-val gold-val" id="hs-sess">—</div></div>
   </div>
 
-  <!-- Trade History Section -->
-  <div style="margin-bottom:14px;">
-    <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">ประวัติการเทรด</div>
+  <div class="card">
+    <div class="card-title">Trade History</div>
+    <div style="overflow-x:auto;">
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>เวลาเปิด</th>
+            <th>ทิศทาง</th>
+            <th>Strategy</th>
+            <th>Lot</th>
+            <th>เปิด</th>
+            <th>ปิด</th>
+            <th>Pips</th>
+            <th>P&L</th>
+            <th>Confidence</th>
+            <th>Session</th>
+            <th>ผล</th>
+          </tr>
+        </thead>
+        <tbody id="hist-tbody">
+          <tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-size:10px;">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-    <!-- Stats Cards -->
-    <div id="stats-cards" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px;"></div>
+<!-- ===== ANALYTICS TAB ===== -->
+<div class="tab-panel" id="tab-analytics">
 
-    <!-- History Table -->
-    <div id="history-section" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;">
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:12px;">
-          <thead>
-            <tr style="border-bottom:0.5px solid var(--color-border-tertiary);">
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">เวลาเปิด</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">ทิศทาง</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Strategy</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Lot</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">ราคาเปิด → ปิด</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Pips</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">P&L</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Conf</th>
-              <th style="padding:10px 8px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);">ผล / Session</th>
-            </tr>
-          </thead>
-          <tbody id="history-table">
-            <tr><td colspan="9" style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">กำลังโหลด...</td></tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="analytics-grid" style="margin-bottom:24px;">
+    <div class="analytics-card">
+      <div class="a-label">Win Rate รวม</div>
+      <div class="a-val green-val" id="an-wr">—</div>
+      <div class="a-sub" id="an-wl">—</div>
+    </div>
+    <div class="analytics-card">
+      <div class="a-label">Avg Profit / Trade</div>
+      <div class="a-val" id="an-avg">—</div>
+    </div>
+    <div class="analytics-card">
+      <div class="a-label">กำไรรวม</div>
+      <div class="a-val" id="an-total">—</div>
     </div>
   </div>
 
-  <div class="footer" id="footer">ยังไม่ได้รับข้อมูล — รัน adaptive_ai_server.py และ MT5 EA ก่อน</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Win Rate by Strategy</div>
+      <div id="strat-breakdown"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Win Rate by Session</div>
+      <div id="sess-breakdown"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">P&L ย้อนหลัง 20 Trade</div>
+    <div class="chart-wrap" style="height:160px;">
+      <canvas id="pnlChart" role="img" aria-label="P&L history chart">P&L chart</canvas>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer" id="footer">AURUM AI · XAUUSD PORTFOLIO INTELLIGENCE · —</div>
+</div>
 </div>
 
 <script>
 const BRIDGE = "https://xauusd-bridge-production.up.railway.app/data";
-const ph = { labels: [], data: [] };
-let chart;
+const STATS  = "https://xauusd-bridge-production.up.railway.app/stats?symbol=XAUUSD.cent";
 
-function initChart() {
-  chart = new Chart(document.getElementById('priceChart').getContext('2d'), {
-    type: 'line',
-    data: { labels: ph.labels, datasets: [{ data: ph.data, borderColor: '#D4AF37', backgroundColor: 'rgba(212,175,55,0.06)', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false, animation: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#555', font: { size: 10 }, maxTicksLimit: 5 }, grid: { color: 'rgba(255,255,255,0.03)' } },
-        y: { ticks: { color: '#555', font: { size: 10 }, callback: v => '$' + v.toFixed(0) }, grid: { color: 'rgba(255,255,255,0.03)' } }
-      }
+const ph = { labels: [], data: [] };
+let priceChart, pnlChart;
+let allTrades = [];
+
+// Tab switching
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['overview','positions','history','analytics'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if(name === 'history' || name === 'analytics') loadHistory();
+}
+
+// Helpers
+const fmt = n => n ? '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+const fmtP = n => (n>=0?'+$':'-$') + Math.abs(n).toFixed(2);
+const fmtMono = n => n ? n.toFixed(2) : '—';
+const $ = id => document.getElementById(id);
+
+function setTag(id, text, cls) {
+  const el = $(id); if(!el) return;
+  el.textContent = text;
+  el.className = 'tag ' + cls;
+}
+
+function initCharts() {
+  const opts = {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#5A5348', font: { size: 9 }, maxTicksLimit: 5 }, grid: { color: 'rgba(201,168,76,0.05)' } },
+      y: { ticks: { color: '#5A5348', font: { size: 9 }, callback: v => '$'+v.toFixed(0) }, grid: { color: 'rgba(201,168,76,0.05)' } }
     }
+  };
+  priceChart = new Chart($('priceChart').getContext('2d'), {
+    type: 'line',
+    data: { labels: ph.labels, datasets: [{ data: ph.data, borderColor: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.05)', borderWidth: 1, pointRadius: 0, fill: true, tension: 0.3 }] },
+    options: { ...opts, scales: { ...opts.scales, y: { ...opts.scales.y, ticks: { ...opts.scales.y.ticks, callback: v => '$'+v.toFixed(0) } } } }
   });
 }
 
-const $ = id => document.getElementById(id);
-const fmt = n => n ? '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-const fmtP = n => (n >= 0 ? '+$' : '-$') + Math.abs(n).toFixed(2);
-
-function pill(id, text, cls) { const el = $(id); el.textContent = text; el.className = 'pill ' + cls; }
-
-function stratClass(s) {
-  if(s==='SCALP') return 'strat-scalp';
-  if(s==='INTRADAY') return 'strat-intraday';
-  if(s==='SWING') return 'strat-swing';
-  return 'strat-wait';
-}
-function confColor(c) {
-  if(c >= 75) return 'var(--green)';
-  if(c >= 50) return 'var(--amber)';
-  return 'var(--red)';
-}
-
-function update(d) {
-  $('connDot').className = 'dot live';
-  $('connText').textContent = 'เชื่อมต่อแล้ว · Live';
-
-  const ai = d.ai || {};
-
-  // AI Brain
-  const sig = ai.signal || 'WAIT';
-  $('ai-signal').textContent = sig;
-  $('ai-signal').className = 'ai-signal sig-' + sig.toLowerCase();
-  const strat = ai.strategy || 'WAIT';
-  $('ai-strat').textContent = strat;
-  $('ai-strat').className = 'ai-strategy-badge ' + stratClass(strat);
-  const conf = ai.confidence || 0;
-  $('ai-conf').textContent = conf + '%';
-  $('conf-bar').style.width = conf + '%';
-  $('conf-bar').style.background = confColor(conf);
-  $('ai-time').textContent = 'วิเคราะห์: ' + (ai.last_analysis || '—');
-  $('ai-hold').textContent = ai.hold_type || '—';
-  $('ai-sl').textContent = ai.sl_pips ? ai.sl_pips + ' pips' : '—';
-  $('ai-tp').textContent = ai.tp_pips ? ai.tp_pips + ' pips' : '—';
-  $('ai-rr').textContent = ai.rr_ratio || '—';
-  $('ai-cond').textContent = ai.market_condition || '—';
-  $('ai-reason').textContent = ai.reasoning || '—';
-  $('ai-price').textContent = fmt(d.bid);
-  $('ai-spread').textContent = d.spread ? d.spread + ' pts' : '—';
-  $('ai-atr').textContent = d.atr ? d.atr.toFixed(2) : '—';
+function updateUI(d) {
+  $('live-dot').className = 'live-dot on';
+  $('live-text').textContent = 'Live';
+  $('h-price').textContent = d.bid ? '$' + d.bid.toFixed(2) : '—';
 
   // Metrics
-  const fl = (d.equity || 0) - (d.balance || 0);
-  $('m-bal').textContent = fmt(d.balance);
-  $('m-eq').textContent = fmt(d.equity);
-  const fe = $('m-float');
-  fe.textContent = fmtP(fl); fe.className = 'metric-val ' + (fl >= 0 ? 'up' : 'down');
+  const fl = (d.equity||0) - (d.balance||0);
+  $('m-bal').textContent   = fmt(d.balance);
+  $('m-eq').textContent    = fmt(d.equity);
+  $('m-float').textContent = fmtP(fl);
+  $('m-float').className   = 'metric-val ' + (fl>=0?'green-val':'red-val');
   $('m-margin').textContent = fmt(d.free_margin);
-  $('m-poscount').textContent = (d.positions || []).length;
+  $('m-pos').textContent   = (d.positions||[]).length;
+
+  // AI
+  const ai = d.ai || {};
+  const sig = ai.signal || 'WAIT';
+  $('sig-val').textContent = sig;
+  $('sig-val').className   = 'signal-val ' + (sig==='BUY'?'sig-buy':sig==='SELL'?'sig-sell':'sig-wait');
+  $('sig-strat').textContent = ai.strategy || '—';
+  const conf = ai.confidence || 0;
+  $('sig-conf').textContent = conf + '%';
+  $('conf-bar').style.width = conf + '%';
+  $('conf-bar').style.background = conf>=75?'#4CAF72':conf>=50?'#C9A84C':'#E05252';
+  $('sig-time').textContent = ai.last_analysis ? 'วิเคราะห์: ' + ai.last_analysis : '—';
+  $('ai-reason').textContent = ai.reasoning || '—';
+  $('d-cond').textContent   = ai.market_condition || '—';
+  $('d-price').textContent  = d.bid ? '$' + d.bid.toFixed(2) : '—';
+  $('d-spread').textContent = d.spread ? d.spread + ' pts' : '—';
+  $('d-atr').textContent    = d.atr ? d.atr.toFixed(2) : '—';
+
+  const ts = d.timestamp || 0;
+  const h = ts ? new Date(ts*1000).getHours() : 0;
+  $('d-session').textContent = h>=2&&h<9?'Asian':h>=9&&h<14?'London':h>=14&&h<20?'New York':'Off-hours';
 
   // Indicators
   const bull = d.ema20 > d.ema50;
-  $('i-ema20').textContent = d.ema20 ? d.ema20.toFixed(2) : '—';
-  $('i-ema50').textContent = d.ema50 ? d.ema50.toFixed(2) : '—';
-  $('i-rsi').textContent = d.rsi ? d.rsi.toFixed(1) : '—';
-  $('i-atr').textContent = d.atr ? d.atr.toFixed(2) : '—';
+  $('i-ema20').textContent = fmtMono(d.ema20);
+  $('i-ema50').textContent = fmtMono(d.ema50);
+  $('i-rsi').textContent   = d.rsi ? d.rsi.toFixed(1) : '—';
+  $('i-atr').textContent   = fmtMono(d.atr);
   $('i-trend').textContent = bull ? 'EMA Cross UP' : 'EMA Cross DOWN';
-  pill('p-ema20', bull ? 'BULL' : 'BEAR', bull ? 'p-bull' : 'p-bear');
-  pill('p-ema50', bull ? 'BULL' : 'BEAR', bull ? 'p-bull' : 'p-bear');
-  const r = d.rsi || 50;
-  pill('p-rsi', r > 70 ? 'OVERBOUGHT' : r < 30 ? 'OVERSOLD' : 'NORMAL', r > 70 ? 'p-bear' : r < 30 ? 'p-bull' : 'p-neu');
-  pill('p-trend', bull ? 'UPTREND' : 'DOWNTREND', bull ? 'p-bull' : 'p-bear');
+  setTag('t-ema20', bull?'BULL':'BEAR', bull?'tag-bull':'tag-bear');
+  setTag('t-ema50', bull?'BULL':'BEAR', bull?'tag-bull':'tag-bear');
+  const r = d.rsi||50;
+  setTag('t-rsi', r>70?'OVERBOUGHT':r<30?'OVERSOLD':'NORMAL', r>70?'tag-bear':r<30?'tag-bull':'tag-neu');
+  setTag('t-trend', bull?'UPTREND':'DOWNTREND', bull?'tag-bull':'tag-bear');
 
   // Positions
   const pl = $('pos-list');
-  if (!d.positions || !d.positions.length) {
-    pl.innerHTML = '<div class="no-pos">ไม่มี Position ที่เปิดอยู่</div>';
+  const positions = d.positions || [];
+  if(!positions.length) {
+    pl.innerHTML = '<div class="no-pos">No Open Positions</div>';
   } else {
-    pl.innerHTML = d.positions.map(p => {
-      const sc = stratClass(strat);
-      return `<div class="pos-item">
+    pl.innerHTML = positions.map(p => `
+      <div class="pos-item">
         <div>
-          <span class="pos-type ${p.type==='BUY'?'up':'down'}">${p.type}</span>
-          <span class="pos-strat ${sc}">${strat}</span>
-          <div class="pos-info">${p.lots} lot · เปิดที่ ${fmt(p.open)}</div>
-          <div class="pos-info">SL: ${fmt(p.sl)} · TP: ${fmt(p.tp)}</div>
+          <div class="pos-type ${p.type==='BUY'?'green-val':'red-val'}">${p.type} · ${p.lots} lot</div>
+          <div class="pos-info">Entry: $${p.open.toFixed(2)} · SL: $${p.sl.toFixed(2)} · TP: $${p.tp.toFixed(2)}</div>
         </div>
-        <div class="pos-pnl ${p.profit>=0?'up':'down'}">${fmtP(p.profit)}</div>
-      </div>`;
-    }).join('');
+        <div class="pos-pnl ${p.profit>=0?'green-val':'red-val'}">${fmtP(p.profit)}</div>
+      </div>`).join('');
   }
 
-  // Chart
+  // Price chart
   const now = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   ph.labels.push(now); ph.data.push(parseFloat(d.bid));
   if(ph.labels.length > 80) { ph.labels.shift(); ph.data.shift(); }
-  chart.update('none');
+  if(priceChart) priceChart.update('none');
 
-  $('footer').textContent = 'อัพเดต: ' + now + ' · XAUUSD M15 · Adaptive AI Bridge :8080';
+  $('footer').textContent = 'AURUM AI · XAUUSD · Updated ' + now;
+}
+
+async function loadHistory() {
+  try {
+    const r = await fetch(STATS);
+    const data = await r.json();
+    allTrades = data.trades || [];
+
+    // History stats
+    const wr = data.win_rate || 0;
+    $('hs-total').textContent = data.total || 0;
+    $('hs-wr').textContent = wr.toFixed(1) + '%';
+    $('hs-wr').className = 'metric-val ' + (wr>=60?'green-val':wr>=40?'gold-val':'red-val');
+    $('hs-wl').textContent = (data.wins||0) + 'W / ' + (data.losses||0) + 'L';
+    $('hs-profit').textContent = fmtP(data.total_profit||0);
+    $('hs-profit').className = 'metric-val ' + ((data.total_profit||0)>=0?'green-val':'red-val');
+
+    // Best strategy
+    const strats = {};
+    const sessions = {};
+    allTrades.forEach(t => {
+      const s = t.strategy||'UNKNOWN';
+      if(!strats[s]) strats[s] = {w:0,t:0};
+      strats[s].t++; if(t.win) strats[s].w++;
+      const ss = t.session||'Unknown';
+      if(!sessions[ss]) sessions[ss] = {w:0,t:0};
+      sessions[ss].t++; if(t.win) sessions[ss].w++;
+    });
+    let bestStrat = '—', bestStratWr = 0;
+    Object.entries(strats).forEach(([s,d]) => { const w = d.w/d.t*100; if(w>bestStratWr){bestStratWr=w;bestStrat=s;} });
+    let bestSess = '—', bestSessWr = 0;
+    Object.entries(sessions).forEach(([s,d]) => { const w = d.w/d.t*100; if(w>bestSessWr){bestSessWr=w;bestSess=s;} });
+    $('hs-strat').textContent = bestStrat;
+    $('hs-sess').textContent = bestSess;
+
+    // History table
+    const tbody = $('hist-tbody');
+    if(!allTrades.length) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3);font-size:10px;letter-spacing:1px;text-transform:uppercase;">No Trade History Yet</td></tr>';
+    } else {
+      tbody.innerHTML = allTrades.map(t => {
+        const strat = t.strategy||'UNKNOWN';
+        const sc = strat==='SCALP'?'st-scalp':strat==='INTRADAY'?'st-intraday':strat==='SWING'?'st-swing':strat==='RECOVERY'?'st-recovery':'st-trend';
+        const conf = t.confidence||0;
+        const confColor = conf>=75?'#4CAF72':conf>=50?'#C9A84C':'#E05252';
+        const pips = t.pips||0;
+        const profit = t.profit||0;
+        const dt = t.open_time ? new Date(t.open_time) : null;
+        const timeStr = dt ? dt.toLocaleDateString('th-TH',{month:'short',day:'numeric'})+' '+dt.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '—';
+        return `<tr>
+          <td style="color:var(--text3);font-family:'DM Mono',monospace">${timeStr}</td>
+          <td style="font-family:'DM Mono',monospace;color:${t.type==='BUY'?'#4CAF72':'#E05252'};font-weight:500">${t.type||'—'}</td>
+          <td><span class="strat-tag ${sc}">${strat}</span></td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text2)">${(t.lots||0).toFixed(2)}</td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text2)">${(t.open_price||0).toFixed(2)}</td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text2)">${(t.close_price||0).toFixed(2)}</td>
+          <td style="font-family:'DM Mono',monospace;color:${pips>=0?'#4CAF72':'#E05252'}">${pips>=0?'+':''}${pips.toFixed(1)}</td>
+          <td style="font-family:'DM Mono',monospace;color:${profit>=0?'#4CAF72':'#E05252'};font-weight:500">${fmtP(profit)}</td>
+          <td style="font-family:'DM Mono',monospace;color:${confColor}">${conf}%</td>
+          <td style="color:var(--text3)">${t.session||'—'}</td>
+          <td><span class="win-tag ${t.win?'win-yes':'win-no'}">${t.win?'WIN':'LOSS'}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Analytics
+    $('an-wr').textContent = wr.toFixed(1) + '%';
+    $('an-wl').textContent = (data.wins||0) + ' Wins / ' + (data.losses||0) + ' Losses';
+    const avgP = allTrades.length ? (data.total_profit||0) / allTrades.length : 0;
+    $('an-avg').textContent = fmtP(avgP);
+    $('an-avg').className = 'a-val ' + (avgP>=0?'green-val':'red-val');
+    $('an-total').textContent = fmtP(data.total_profit||0);
+    $('an-total').className = 'a-val ' + ((data.total_profit||0)>=0?'green-val':'red-val');
+
+    // Strategy breakdown
+    $('strat-breakdown').innerHTML = Object.entries(strats).map(([s,d]) => {
+      const w = d.t > 0 ? d.w/d.t*100 : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+        <span style="font-size:11px;color:var(--text2)">${s}</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:80px;height:2px;background:var(--bg4);border-radius:1px;overflow:hidden"><div style="height:2px;background:var(--gold);width:${w}%"></div></div>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${w>=60?'#4CAF72':w>=40?'#C9A84C':'#E05252'}">${w.toFixed(0)}%</span>
+          <span style="font-size:10px;color:var(--text3)">${d.t} trades</span>
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:20px;text-align:center;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1px">No Data</div>';
+
+    // Session breakdown
+    $('sess-breakdown').innerHTML = Object.entries(sessions).map(([s,d]) => {
+      const w = d.t > 0 ? d.w/d.t*100 : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+        <span style="font-size:11px;color:var(--text2)">${s}</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:80px;height:2px;background:var(--bg4);border-radius:1px;overflow:hidden"><div style="height:2px;background:var(--gold);width:${w}%"></div></div>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${w>=60?'#4CAF72':w>=40?'#C9A84C':'#E05252'}">${w.toFixed(0)}%</span>
+          <span style="font-size:10px;color:var(--text3)">${d.t} trades</span>
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:20px;text-align:center;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1px">No Data</div>';
+
+    // P&L chart
+    const last20 = allTrades.slice(0,20).reverse();
+    if(last20.length > 0) {
+      const pnlData = last20.map(t => t.profit||0);
+      const pnlLabels = last20.map((_,i) => '#'+(i+1));
+      const pnlColors = pnlData.map(v => v>=0?'#4CAF72':'#E05252');
+      if(pnlChart) pnlChart.destroy();
+      pnlChart = new Chart($('pnlChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: pnlLabels, datasets: [{ data: pnlData, backgroundColor: pnlColors, borderRadius: 1 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color:'#5A5348',font:{size:9} }, grid: { color:'rgba(201,168,76,0.05)' } },
+            y: { ticks: { color:'#5A5348',font:{size:9},callback:v=>'$'+v.toFixed(0) }, grid: { color:'rgba(201,168,76,0.05)' } }
+          }
+        }
+      });
+    }
+
+  } catch(e) {
+    console.log('History error:', e);
+  }
 }
 
 async function poll() {
@@ -374,109 +740,17 @@ async function poll() {
     const r = await fetch(BRIDGE);
     if(!r.ok) throw new Error();
     const d = await r.json();
-    if(d.bid > 0) update(d);
+    if(d.bid > 0) updateUI(d);
   } catch {
-    $('connDot').className = 'dot';
-    $('connText').textContent = 'Bridge offline';
-    $('footer').textContent = 'ไม่พบ Bridge Server — รัน: python adaptive_ai_server.py';
+    $('live-dot').className = 'live-dot';
+    $('live-text').textContent = 'Offline';
   }
 }
 
-initChart();
+initCharts();
 poll();
-setInterval(poll, 3000);
+setInterval(poll, 5000);
+setInterval(loadHistory, 60000);
 </script>
 </body>
 </html>
-
-<script>
-// ===== TRADE HISTORY SECTION =====
-const STATS_URL = "https://xauusd-bridge-production.up.railway.app/stats?symbol=XAUUSD.cent";
-
-const stratIcon = { SCALP: "S", INTRADAY: "I", SWING: "SW", TREND_FOLLOW: "TF", RECOVERY: "RC", UNKNOWN: "?" };
-const stratColor = { SCALP: "#854F0B", INTRADAY: "#185FA5", SWING: "#534AB7", TREND_FOLLOW: "#0F6E56", RECOVERY: "#993C1D", UNKNOWN: "#888" };
-const stratBg   = { SCALP: "#FAEEDA", INTRADAY: "#E6F1FB", SWING: "#EEEDFE", TREND_FOLLOW: "#E1F5EE", RECOVERY: "#FAECE7", UNKNOWN: "#F1EFE8" };
-
-function fmtPnl(n) { return (n >= 0 ? '+$' : '-$') + Math.abs(n).toFixed(2); }
-function fmtTime(s) {
-  if(!s) return '—';
-  const d = new Date(s);
-  return d.toLocaleDateString('th-TH', {month:'short', day:'numeric'}) + ' ' + d.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
-}
-
-async function loadHistory() {
-  try {
-    const r = await fetch(STATS_URL);
-    const data = await r.json();
-    renderStats(data);
-    renderHistory(data.trades || []);
-  } catch(e) {
-    document.getElementById('history-section').innerHTML = '<p style="color:var(--color-text-secondary);font-size:13px;padding:1rem;">ยังไม่มีประวัติการเทรด — รอ Trade แรกปิดครับ</p>';
-  }
-}
-
-function renderStats(data) {
-  const el = document.getElementById('stats-cards');
-  if(!el) return;
-  const wr = data.win_rate || 0;
-  const wrColor = wr >= 60 ? '#3B6D11' : wr >= 40 ? '#854F0B' : '#A32D2D';
-  el.innerHTML = `
-    <div style="background:var(--color-background-secondary);border-radius:8px;padding:14px;">
-      <div style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Trade ทั้งหมด</div>
-      <div style="font-size:22px;font-weight:500;color:var(--color-text-primary);">${data.total || 0}</div>
-    </div>
-    <div style="background:var(--color-background-secondary);border-radius:8px;padding:14px;">
-      <div style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Win Rate</div>
-      <div style="font-size:22px;font-weight:500;color:${wrColor};">${wr.toFixed(1)}%</div>
-      <div style="font-size:11px;color:var(--color-text-secondary);">${data.wins||0}W / ${data.losses||0}L</div>
-    </div>
-    <div style="background:var(--color-background-secondary);border-radius:8px;padding:14px;">
-      <div style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">กำไรรวม</div>
-      <div style="font-size:22px;font-weight:500;color:${(data.total_profit||0)>=0?'#3B6D11':'#A32D2D'};">${fmtPnl(data.total_profit||0)}</div>
-    </div>`;
-}
-
-function renderHistory(trades) {
-  const el = document.getElementById('history-table');
-  if(!el || trades.length === 0) {
-    if(el) el.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">ยังไม่มีประวัติ รอ Trade แรกปิด</td></tr>';
-    return;
-  }
-
-  el.innerHTML = trades.map(t => {
-    const win = t.win;
-    const pnl = t.profit || 0;
-    const pips = t.pips || 0;
-    const strat = t.strategy || 'UNKNOWN';
-    const conf = t.confidence || 0;
-    const confColor = conf >= 75 ? '#3B6D11' : conf >= 50 ? '#854F0B' : '#A32D2D';
-    const session = t.session || '—';
-    const sessColor = session === 'London' ? '#185FA5' : session === 'New York' ? '#534AB7' : session === 'Asian' ? '#0F6E56' : '#888';
-
-    return `<tr style="border-bottom:0.5px solid var(--color-border-tertiary);">
-      <td style="padding:8px;font-size:12px;color:var(--color-text-secondary);">${fmtTime(t.open_time)}</td>
-      <td style="padding:8px;">
-        <span style="font-size:11px;font-weight:500;color:${t.type==='BUY'?'#3B6D11':'#A32D2D'}">${t.type||'—'}</span>
-      </td>
-      <td style="padding:8px;">
-        <span style="font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;background:${stratBg[strat]||'#F1EFE8'};color:${stratColor[strat]||'#888'}">${strat}</span>
-      </td>
-      <td style="padding:8px;font-size:12px;color:var(--color-text-secondary);">${(t.lots||0).toFixed(2)}</td>
-      <td style="padding:8px;font-size:12px;color:var(--color-text-secondary);">${(t.open_price||0).toFixed(2)} → ${(t.close_price||0).toFixed(2)}</td>
-      <td style="padding:8px;font-size:12px;color:${pips>=0?'#3B6D11':'#A32D2D'};font-weight:500;">${pips>=0?'+':''}${pips.toFixed(1)}</td>
-      <td style="padding:8px;font-size:12px;color:${pnl>=0?'#3B6D11':'#A32D2D'};font-weight:500;">${fmtPnl(pnl)}</td>
-      <td style="padding:8px;">
-        <span style="font-size:11px;font-weight:500;color:${confColor}">${conf}%</span>
-      </td>
-      <td style="padding:8px;">
-        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:${win?'#EAF3DE':'#FCEBEB'};color:${win?'#27500A':'#791F1F'};font-weight:500">${win?'WIN':'LOSS'}</span>
-        <div style="font-size:10px;color:${sessColor};margin-top:2px">${session}</div>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// Load history on start and every 30 seconds
-loadHistory();
-setInterval(loadHistory, 30000);
-</script>
