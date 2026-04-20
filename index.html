@@ -6,6 +6,7 @@
 <title>Aurum AI — บอทเทรด XAUUSD ด้วย AI | เพิ่มกำไร 2X-5X</title>
 <meta name="description" content="Aurum AI คือบอทเทรดทองคำ XAUUSD ด้วย AI และ Machine Learning ช่วยเพิ่มประสิทธิภาพการเทรดของคุณ 2X-5X ทดลองใช้ฟรี 14 วัน">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root {
   --bg0: #03031a;
@@ -813,6 +814,521 @@ body::before {
   .price-amount { font-size: 40px; }
   .trust-row { gap: 12px; font-size: 11px; }
 }
+
+/* ========== DASHBOARD STYLES (scoped) ========== */
+
+:root {
+  --bg4: rgba(80, 80, 160, 0.25);
+  --gold-dim: rgba(255,211,105,0.12);
+  --gold-line: rgba(255,211,105,0.3);
+  --cyan-line: rgba(0,229,255,0.35);
+  --purple-line: rgba(177,77,255,0.35);
+  --blue: #5B9CF6;
+  --border2: rgba(120, 140, 230, 0.3);
+  --radius: 6px;
+}
+
+/* Dashboard view toggle */
+#dashboard-view { display: none; }
+body.dashboard-mode #dashboard-view { display: block !important; }
+body.dashboard-mode .main > section:not(#dashboard-view),
+body.dashboard-mode .hero,
+body.dashboard-mode > footer.footer { display: none !important; }
+/* Keep navbar visible so user can switch back to landing */
+body.dashboard-mode .main { padding: 0 !important; max-width: none !important; }
+/* Dashboard view inherits dark bg but keep landing's star background */
+#dashboard-view { font-size: 13px; }
+#dashboard-view .app { position: relative; z-index: 1; }
+/* Offset dashboard's sticky header so it sits below landing navbar */
+body.dashboard-mode #dashboard-view .header { top: 64px; }
+/* Active state for Dashboard nav link */
+body.dashboard-mode .nav-links a[data-nav="dashboard"] {
+  color: var(--gold);
+}
+
+
+#dashboard-view .app { position: relative; z-index: 1; }
+
+#dashboard-view .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 72px;
+  background: rgba(5, 5, 30, 0.55);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(120, 140, 230, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+#dashboard-view .header-brand { display: flex; align-items: center; gap: 16px; }
+#dashboard-view .brand-mascot {
+  width: 44px; height: 44px;
+  position: relative;
+  animation: float 3.5s ease-in-out infinite;
+}
+#dashboard-view .brand-mascot svg { width: 100%; height: 100%; filter: drop-shadow(0 0 12px rgba(0,229,255,0.6)); }
+@keyframes float { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-4px) rotate(2deg)} }
+#dashboard-view .brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 500;
+  background: linear-gradient(120deg, #FFE29A 0%, #FFF4C9 40%, #00E5FF 70%, #B14DFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+#dashboard-view .brand-sub { font-size: 10px; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+#dashboard-view .header-right { display: flex; align-items: center; gap: 24px; }
+#dashboard-view .live-pill {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; color: var(--text2);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 6px 12px;
+  background: rgba(120, 140, 230, 0.08);
+  border: 1px solid rgba(120, 140, 230, 0.15);
+  border-radius: 999px;
+}
+#dashboard-view .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #555; box-shadow: 0 0 0 0 transparent; }
+#dashboard-view .live-dot.on { background: var(--green); box-shadow: 0 0 12px var(--green), 0 0 0 0 rgba(61,255,168,0.6); animation: pulseDot 2s infinite; }
+@keyframes pulseDot { 0%,100%{box-shadow: 0 0 12px var(--green), 0 0 0 0 rgba(61,255,168,0.6)} 50%{box-shadow: 0 0 16px var(--green), 0 0 0 6px rgba(61,255,168,0)} }
+#dashboard-view .price-display {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  color: var(--gold2);
+  font-weight: 500;
+  text-shadow: 0 0 20px rgba(255,211,105,0.5);
+  letter-spacing: 0.5px;
+}
+
+#dashboard-view .tabs {
+  display: flex;
+  gap: 6px;
+  padding: 16px 40px;
+  background: rgba(5, 5, 30, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(120, 140, 230, 0.1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#dashboard-view .tabs::-webkit-scrollbar { display: none; }
+#dashboard-view .tab {
+  padding: 10px 18px;
+  font-size: 11px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  position: relative;
+}
+#dashboard-view .tab:hover {
+  color: var(--text);
+  background: rgba(120, 140, 230, 0.08);
+  border-color: rgba(120, 140, 230, 0.15);
+}
+#dashboard-view .tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(177,77,255,0.15));
+  border-color: rgba(0,229,255,0.4);
+  box-shadow: 0 0 20px rgba(0,229,255,0.25), inset 0 0 20px rgba(177,77,255,0.1);
+}
+#dashboard-view .tab-icon { font-size: 14px; line-height: 1; }
+
+#dashboard-view .main { padding: 36px 40px; max-width: 1480px; margin: 0 auto; }
+#dashboard-view .tab-panel { display: none; animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+#dashboard-view .tab-panel.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+#dashboard-view .section-hero { margin-bottom: 32px; }
+#dashboard-view .section-hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px; font-weight: 400;
+  letter-spacing: -0.5px; line-height: 1.1;
+  margin-bottom: 8px;
+  background: linear-gradient(120deg, #fff 0%, #E8ECFF 40%, #00E5FF 80%, #B14DFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+#dashboard-view .section-hero p { font-size: 14px; color: var(--text2); letter-spacing: 0.3px; }
+
+#dashboard-view .metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+#dashboard-view .metric {
+  background: linear-gradient(135deg, rgba(28,28,80,0.55), rgba(18,18,56,0.35));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(120, 140, 230, 0.18);
+  border-radius: 18px;
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s;
+}
+#dashboard-view .metric::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0,229,255,0.4), transparent 40%, transparent 60%, rgba(177,77,255,0.4));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+#dashboard-view .metric:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 50px -20px rgba(0,229,255,0.3);
+}
+#dashboard-view .metric:hover::before { opacity: 1; }
+#dashboard-view .metric-label { font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
+#dashboard-view .metric-val { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--text); line-height: 1; letter-spacing: -0.3px; }
+#dashboard-view .metric-sub { font-size: 11px; color: var(--text3); margin-top: 8px; letter-spacing: 0.2px; }
+#dashboard-view .gold-val { color: var(--gold2); text-shadow: 0 0 20px rgba(255,211,105,0.3); }
+#dashboard-view .green-val { color: var(--green); text-shadow: 0 0 18px rgba(61,255,168,0.35); }
+#dashboard-view .red-val { color: var(--red); text-shadow: 0 0 18px rgba(255,94,122,0.35); }
+#dashboard-view .cyan-val { color: var(--cyan); text-shadow: 0 0 18px rgba(0,229,255,0.4); }
+#dashboard-view .purple-val { color: var(--purple); text-shadow: 0 0 18px rgba(177,77,255,0.4); }
+
+#dashboard-view .ai-panel {
+  display: grid;
+  grid-template-columns: 280px 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+#dashboard-view .ai-signal-block, #dashboard-view .ai-detail, #dashboard-view .ai-reasoning-block {
+  background: linear-gradient(135deg, rgba(28,28,80,0.55), rgba(18,18,56,0.35));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(120, 140, 230, 0.18);
+  border-radius: 20px;
+  padding: 26px;
+}
+#dashboard-view .ai-signal-block {
+  padding: 28px 22px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+#dashboard-view .ai-signal-block::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(0,229,255,0.12), transparent 60%);
+  animation: rotateBg 14s linear infinite;
+  pointer-events: none;
+}
+@keyframes rotateBg { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+#dashboard-view .ai-signal-block > * { position: relative; z-index: 1; }
+#dashboard-view .signal-label { font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--text2); margin-bottom: 16px; font-weight: 500; }
+#dashboard-view .signal-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 58px; font-weight: 400; line-height: 1; letter-spacing: 3px;
+  display: inline-block;
+}
+#dashboard-view .sig-buy { color: var(--green); text-shadow: 0 0 28px rgba(61,255,168,0.6); }
+#dashboard-view .sig-sell { color: var(--red); text-shadow: 0 0 28px rgba(255,94,122,0.6); }
+#dashboard-view .sig-wait { color: var(--text2); }
+#dashboard-view .strategy-tag {
+  display: inline-block;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 14px;
+  border: 1px solid var(--cyan-line);
+  background: var(--cyan-dim);
+  color: var(--cyan);
+  border-radius: 999px;
+  margin-top: 14px;
+  font-weight: 500;
+}
+#dashboard-view .conf-row { margin-top: 18px; }
+#dashboard-view .conf-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 32px; font-weight: 500;
+  background: linear-gradient(120deg, #00E5FF, #B14DFF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+#dashboard-view .conf-bar-bg { height: 4px; background: rgba(80, 80, 160, 0.25); margin-top: 10px; border-radius: 999px; overflow: hidden; }
+#dashboard-view .conf-bar {
+  height: 4px;
+  background: linear-gradient(90deg, #00E5FF, #B14DFF, #FF4DB8);
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(0,229,255,0.5);
+}
+#dashboard-view .signal-time { font-size: 10px; color: var(--text3); margin-top: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+
+#dashboard-view .detail-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); margin-bottom: 18px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+#dashboard-view .detail-title::before {
+  content: '';
+  display: block;
+  width: 4px; height: 14px;
+  background: linear-gradient(180deg, var(--cyan), var(--purple));
+  border-radius: 2px;
+}
+#dashboard-view .detail-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(120, 140, 230, 0.08); }
+#dashboard-view .detail-row:last-child { border-bottom: none; }
+#dashboard-view .d-label { font-size: 12px; color: var(--text2); }
+#dashboard-view .d-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); font-weight: 500; }
+
+#dashboard-view .reasoning-text {
+  font-size: 13px; color: var(--text); line-height: 1.85;
+  border-left: 2px solid transparent;
+  border-image: linear-gradient(180deg, var(--cyan), var(--purple)) 1;
+  padding-left: 16px;
+  position: relative;
+}
+
+#dashboard-view .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+
+#dashboard-view .card {
+  background: linear-gradient(135deg, rgba(28,28,80,0.55), rgba(18,18,56,0.35));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(120, 140, 230, 0.18);
+  border-radius: 20px;
+  padding: 28px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+#dashboard-view .card:hover { border-color: rgba(0,229,255,0.3); box-shadow: 0 20px 50px -25px rgba(0,229,255,0.25); }
+#dashboard-view .card-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); margin-bottom: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+#dashboard-view .card-title::before {
+  content: '';
+  display: block;
+  width: 4px; height: 14px;
+  background: linear-gradient(180deg, var(--cyan), var(--purple));
+  border-radius: 2px;
+}
+
+#dashboard-view .ind-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(120, 140, 230, 0.08); }
+#dashboard-view .ind-row:last-child { border-bottom: none; }
+#dashboard-view .ind-name { font-size: 12px; color: var(--text2); letter-spacing: 0.3px; }
+#dashboard-view .ind-val { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text); font-weight: 500; }
+#dashboard-view .tag { font-size: 9px; letter-spacing: 1.2px; padding: 4px 10px; text-transform: uppercase; border-radius: 999px; font-weight: 600; }
+#dashboard-view .tag-bull { background: rgba(61,255,168,0.12); color: var(--green); border: 1px solid rgba(61,255,168,0.3); }
+#dashboard-view .tag-bear { background: rgba(255,94,122,0.12); color: var(--red); border: 1px solid rgba(255,94,122,0.3); }
+#dashboard-view .tag-neu { background: rgba(120,140,230,0.15); color: var(--text2); border: 1px solid rgba(120,140,230,0.25); }
+#dashboard-view .tag-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-line); }
+#dashboard-view .tag-cyan { background: var(--cyan-dim); color: var(--cyan); border: 1px solid var(--cyan-line); }
+
+#dashboard-view .chart-wrap { position: relative; width: 100%; height: 220px; }
+
+#dashboard-view .pos-item {
+  border: 1px solid rgba(120, 140, 230, 0.18);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(40,40,110,0.4), rgba(28,28,80,0.25));
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#dashboard-view .pos-item:hover {
+  border-color: rgba(0,229,255,0.4);
+  transform: translateX(4px);
+  box-shadow: 0 10px 30px -15px rgba(0,229,255,0.4);
+}
+#dashboard-view .pos-item:last-child { margin-bottom: 0; }
+#dashboard-view .pos-type { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 1px; }
+#dashboard-view .pos-info { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: 'DM Mono', monospace; }
+#dashboard-view .pos-pnl { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; }
+#dashboard-view .no-pos {
+  text-align: center;
+  padding: 48px 32px;
+  color: var(--text2);
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+#dashboard-view .no-pos::before {
+  content: '✧';
+  display: block;
+  font-size: 32px;
+  color: var(--cyan);
+  margin-bottom: 10px;
+  opacity: 0.6;
+}
+
+#dashboard-view .hist-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+#dashboard-view .hist-table th {
+  text-align: left; padding: 14px 14px;
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text2); font-weight: 600;
+  border-bottom: 1px solid rgba(120, 140, 230, 0.2);
+}
+#dashboard-view .hist-table td { padding: 14px 14px; border-bottom: 1px solid rgba(120, 140, 230, 0.06); }
+#dashboard-view .hist-table tr { transition: background 0.2s; }
+#dashboard-view .hist-table tr:hover td { background: rgba(0, 229, 255, 0.04); }
+#dashboard-view .strat-tag {
+  font-size: 9px; padding: 3px 10px; letter-spacing: 1.2px; text-transform: uppercase;
+  border: 1px solid; border-radius: 999px; font-weight: 600;
+}
+#dashboard-view .st-scalp { color: #FFB84D; border-color: rgba(255,184,77,0.4); background: rgba(255,184,77,0.12); }
+#dashboard-view .st-intraday { color: var(--cyan); border-color: var(--cyan-line); background: var(--cyan-dim); }
+#dashboard-view .st-swing { color: var(--purple); border-color: var(--purple-line); background: var(--purple-dim); }
+#dashboard-view .st-recovery { color: var(--red); border-color: rgba(255,94,122,0.4); background: rgba(255,94,122,0.12); }
+#dashboard-view .st-trend { color: var(--green); border-color: rgba(61,255,168,0.4); background: rgba(61,255,168,0.12); }
+#dashboard-view .win-tag { font-size: 9px; padding: 3px 10px; letter-spacing: 1.2px; text-transform: uppercase; border: 1px solid; border-radius: 999px; font-weight: 600; }
+#dashboard-view .win-yes { color: var(--green); border-color: rgba(61,255,168,0.4); background: rgba(61,255,168,0.12); }
+#dashboard-view .win-no { color: var(--red); border-color: rgba(255,94,122,0.4); background: rgba(255,94,122,0.12); }
+
+#dashboard-view .analytics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+#dashboard-view .analytics-card {
+  background: linear-gradient(135deg, rgba(28,28,80,0.55), rgba(18,18,56,0.35));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(120, 140, 230, 0.18);
+  border-radius: 20px;
+  padding: 28px;
+}
+#dashboard-view .a-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
+#dashboard-view .a-val { font-family: 'DM Mono', monospace; font-size: 36px; color: var(--text); font-weight: 500; letter-spacing: -0.5px; }
+#dashboard-view .a-sub { font-size: 11px; color: var(--text3); margin-top: 6px; letter-spacing: 0.3px; }
+
+#dashboard-view .mascot-big { width: 160px; height: 160px; margin: 0 auto 18px; animation: float 3.5s ease-in-out infinite; }
+#dashboard-view .mascot-big svg { width: 100%; height: 100%; filter: drop-shadow(0 0 30px rgba(0,229,255,0.55)); }
+
+#dashboard-view .ai-hero {
+  background: linear-gradient(135deg, rgba(177,77,255,0.15), rgba(0,229,255,0.10), rgba(28,28,80,0.55));
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(0,229,255,0.28);
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+#dashboard-view .ai-hero::before {
+  content:'';
+  position: absolute;
+  top:-80px; left:-80px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(0,229,255,0.25), transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+#dashboard-view .ai-hero::after {
+  content:'';
+  position: absolute;
+  bottom:-80px; right:-80px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(177,77,255,0.3), transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+#dashboard-view .ai-hero > * { position: relative; z-index: 1; }
+#dashboard-view .ai-hero-sig {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 96px; font-weight: 400; line-height: 0.95;
+  letter-spacing: 4px;
+}
+#dashboard-view .ai-hero-sub { font-size: 13px; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 12px; }
+
+#dashboard-view .feat-card {
+  background: linear-gradient(135deg, rgba(28,28,80,0.55), rgba(18,18,56,0.35));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(120, 140, 230, 0.18);
+  border-radius: 20px;
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+}
+#dashboard-view .feat-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+#dashboard-view .feat-card p { font-size: 12px; color: var(--text2); line-height: 1.7; }
+#dashboard-view .feat-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  background: linear-gradient(135deg, var(--cyan-dim), var(--purple-dim));
+  border: 1px solid rgba(0,229,255,0.3);
+  margin-bottom: 14px;
+}
+
+#dashboard-view .gauge-ring {
+  position: relative;
+  width: 180px; height: 180px;
+  margin: 0 auto;
+}
+#dashboard-view .gauge-ring svg { transform: rotate(-90deg); }
+#dashboard-view .gauge-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  pointer-events: none;
+}
+#dashboard-view .gauge-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 30px; font-weight: 600;
+  background: linear-gradient(120deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+#dashboard-view .gauge-label { font-size: 10px; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+#dashboard-view .footer {
+  text-align: center;
+  padding: 28px;
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-top: 1px solid rgba(120, 140, 230, 0.1);
+  margin-top: 16px;
+}
+
+#dashboard-view .gold-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--gold-line), transparent); margin: 20px 0; }
+
+#dashboard-view .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+
+@media(max-width:1100px) {
+  #dashboard-view .metrics { grid-template-columns: repeat(3,1fr); }
+  #dashboard-view .analytics-grid { grid-template-columns: 1fr 1fr; }
+  #dashboard-view .ai-panel { grid-template-columns: 1fr; }
+  #dashboard-view .grid3 { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:720px) {
+  #dashboard-view .metrics { grid-template-columns: 1fr 1fr; }
+  #dashboard-view .grid2 { grid-template-columns: 1fr; }
+  #dashboard-view .analytics-grid { grid-template-columns: 1fr; }
+  #dashboard-view .grid3 { grid-template-columns: 1fr; }
+  #dashboard-view .header { padding: 0 18px; height: 64px; }
+  #dashboard-view .tabs { padding: 12px 18px; }
+  #dashboard-view .main { padding: 24px 18px; }
+  #dashboard-view .section-hero h1 { font-size: 32px; }
+  #dashboard-view .ai-hero-sig { font-size: 72px; }
+  #dashboard-view .price-display { font-size: 18px; }
+}
+
 </style>
 </head>
 <body>
@@ -850,10 +1366,11 @@ body::before {
       <span class="logo-text">Aurum AI</span>
     </a>
     <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#how">How It Works</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
+      <a href="#dashboard" data-nav="dashboard">Dashboard</a>
+      <a href="#features" data-nav="landing">Features</a>
+      <a href="#how" data-nav="landing">How It Works</a>
+      <a href="#pricing" data-nav="landing">Pricing</a>
+      <a href="#faq" data-nav="landing">FAQ</a>
       <a href="#" onclick="return false">Docs</a>
     </div>
     <div class="nav-actions">
@@ -1288,6 +1805,512 @@ body::before {
   <a href="#pricing" class="btn btn-primary">🌙 เริ่มทดลองฟรี 14 วัน</a>
 </div>
 
+
+<!-- ========== DASHBOARD VIEW ========== -->
+<section id="dashboard-view" style="display:none;">
+<div class="app">
+
+<!-- Header -->
+<div class="header">
+  <div class="header-brand">
+    <div class="brand-mascot">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gHelmet" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.9"/>
+            <stop offset="60%" stop-color="#B14DFF" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#03031a" stop-opacity="0.9"/>
+          </radialGradient>
+          <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#E8ECFF"/>
+            <stop offset="100%" stop-color="#9AA3D4"/>
+          </linearGradient>
+          <radialGradient id="gCheek" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FF4DB8" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#FF4DB8" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- body -->
+        <ellipse cx="32" cy="50" rx="18" ry="11" fill="url(#gBody)" opacity="0.9"/>
+        <!-- helmet -->
+        <circle cx="32" cy="28" r="20" fill="url(#gHelmet)" opacity="0.95"/>
+        <circle cx="32" cy="28" r="20" fill="none" stroke="#00E5FF" stroke-width="1" opacity="0.7"/>
+        <!-- helmet shine -->
+        <ellipse cx="24" cy="20" rx="6" ry="4" fill="#fff" opacity="0.35"/>
+        <!-- face -->
+        <circle cx="26" cy="30" r="2.5" fill="#03031a"/>
+        <circle cx="38" cy="30" r="2.5" fill="#03031a"/>
+        <circle cx="26.8" cy="29.2" r="0.9" fill="#fff"/>
+        <circle cx="38.8" cy="29.2" r="0.9" fill="#fff"/>
+        <!-- cheeks -->
+        <circle cx="22" cy="34" r="3" fill="url(#gCheek)"/>
+        <circle cx="42" cy="34" r="3" fill="url(#gCheek)"/>
+        <!-- smile -->
+        <path d="M28 36 Q32 39 36 36" stroke="#03031a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <!-- antenna -->
+        <line x1="32" y1="8" x2="32" y2="14" stroke="#FFD369" stroke-width="1.5"/>
+        <circle cx="32" cy="6" r="2.5" fill="#FFD369">
+          <animate attributeName="r" values="2.5;3.5;2.5" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+        <!-- sparkles -->
+        <circle cx="52" cy="18" r="1" fill="#fff" opacity="0.8">
+          <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="10" cy="24" r="1" fill="#00E5FF" opacity="0.8">
+          <animate attributeName="opacity" values="0;1;0" dur="2.5s" begin="0.5s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">Aurum AI</div>
+      <div class="brand-sub">Galactic Trading Intelligence</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-display" id="h-price">—</div>
+    <div class="live-pill">
+      <div class="live-dot" id="live-dot"></div>
+      <span id="live-text">Connecting</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')"><span class="tab-icon">⬡</span>Overview</div>
+  <div class="tab" onclick="switchTab('aicore')"><span class="tab-icon">◉</span>AI Core</div>
+  <div class="tab" onclick="switchTab('radar')"><span class="tab-icon">◎</span>Market Radar</div>
+  <div class="tab" onclick="switchTab('positions')"><span class="tab-icon">▣</span>Positions</div>
+  <div class="tab" onclick="switchTab('history')"><span class="tab-icon">⌘</span>History</div>
+  <div class="tab" onclick="switchTab('analytics')"><span class="tab-icon">✦</span>Analytics</div>
+  <div class="tab" onclick="switchTab('risk')"><span class="tab-icon">△</span>Risk Console</div>
+</div>
+
+<div class="main">
+
+<!-- ===== OVERVIEW TAB ===== -->
+<div class="tab-panel active" id="tab-overview">
+
+  <div class="section-hero">
+    <h1>Command Center</h1>
+    <p>ภาพรวมพอร์ต XAUUSD แบบ real-time — AI กำลังเฝ้าตลาดให้คุณ</p>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Balance</div>
+      <div class="metric-val gold-val" id="m-bal">—</div>
+      <div class="metric-sub">บัญชีรวม</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Equity</div>
+      <div class="metric-val" id="m-eq">—</div>
+      <div class="metric-sub">ทุนปัจจุบัน</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Floating P&L</div>
+      <div class="metric-val" id="m-float">—</div>
+      <div class="metric-sub">กำไร/ขาดทุนลอยตัว</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Free Margin</div>
+      <div class="metric-val" id="m-margin">—</div>
+      <div class="metric-sub">Margin คงเหลือ</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Open Positions</div>
+      <div class="metric-val gold-val" id="m-pos">—</div>
+      <div class="metric-sub">XAUUSD</div>
+    </div>
+  </div>
+
+  <!-- AI Panel -->
+  <div class="ai-panel">
+    <div class="ai-signal-block">
+      <div class="signal-label">AI Decision</div>
+      <div class="signal-val sig-wait" id="sig-val">—</div>
+      <div class="strategy-tag" id="sig-strat">—</div>
+      <div class="conf-row">
+        <div class="conf-num" id="sig-conf">—</div>
+        <div class="conf-bar-bg"><div class="conf-bar" id="conf-bar" style="width:0"></div></div>
+      </div>
+      <div class="signal-time" id="sig-time">—</div>
+    </div>
+
+    <div class="ai-detail">
+      <div class="detail-title">Trade Setup</div>
+      <div class="detail-row"><span class="d-label">Market Condition</span><span class="d-val" id="d-cond">—</span></div>
+      <div class="detail-row"><span class="d-label">Price</span><span class="d-val gold-val" id="d-price">—</span></div>
+      <div class="detail-row"><span class="d-label">Spread</span><span class="d-val" id="d-spread">—</span></div>
+      <div class="detail-row"><span class="d-label">ATR (14)</span><span class="d-val" id="d-atr">—</span></div>
+      <div class="detail-row"><span class="d-label">Session</span><span class="d-val" id="d-session">—</span></div>
+    </div>
+
+    <div class="ai-reasoning-block">
+      <div class="detail-title">AI Reasoning</div>
+      <div class="reasoning-text" id="ai-reason">รอการวิเคราะห์จาก AI...</div>
+    </div>
+  </div>
+
+  <!-- Chart + Indicators -->
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">XAUUSD Price — Live</div>
+      <div class="chart-wrap">
+        <canvas id="priceChart" role="img" aria-label="XAUUSD live price chart">XAUUSD price chart</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Technical Indicators — M5</div>
+      <div class="ind-row"><span class="ind-name">EMA 20</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-ema20">—</span><span class="tag" id="t-ema20">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">EMA 50</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-ema50">—</span><span class="tag" id="t-ema50">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">RSI (14)</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-rsi">—</span><span class="tag" id="t-rsi">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">ATR (14)</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-atr">—</span><span class="tag tag-neu">VOLATILITY</span></div></div>
+      <div class="ind-row"><span class="ind-name">Trend</span><div style="display:flex;gap:8px;align-items:center"><span class="ind-val" id="i-trend">—</span><span class="tag" id="t-trend">—</span></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== AI CORE TAB ===== -->
+<div class="tab-panel" id="tab-aicore">
+  <div class="section-hero">
+    <h1>AI Core</h1>
+    <p>ศูนย์บัญชาการ AI — สัญญาณ · เหตุผล · ความมั่นใจ</p>
+  </div>
+
+  <div class="ai-hero">
+    <div class="mascot-big">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gHelmet2" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.9"/>
+            <stop offset="60%" stop-color="#B14DFF" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#03031a" stop-opacity="0.9"/>
+          </radialGradient>
+          <linearGradient id="gBody2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#E8ECFF"/>
+            <stop offset="100%" stop-color="#9AA3D4"/>
+          </linearGradient>
+          <radialGradient id="gCheek2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FF4DB8" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#FF4DB8" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="32" cy="50" rx="18" ry="11" fill="url(#gBody2)" opacity="0.9"/>
+        <circle cx="32" cy="28" r="20" fill="url(#gHelmet2)" opacity="0.95"/>
+        <circle cx="32" cy="28" r="20" fill="none" stroke="#00E5FF" stroke-width="1" opacity="0.7"/>
+        <ellipse cx="24" cy="20" rx="6" ry="4" fill="#fff" opacity="0.35"/>
+        <circle cx="26" cy="30" r="2.5" fill="#03031a"/>
+        <circle cx="38" cy="30" r="2.5" fill="#03031a"/>
+        <circle cx="26.8" cy="29.2" r="0.9" fill="#fff"/>
+        <circle cx="38.8" cy="29.2" r="0.9" fill="#fff"/>
+        <circle cx="22" cy="34" r="3" fill="url(#gCheek2)"/>
+        <circle cx="42" cy="34" r="3" fill="url(#gCheek2)"/>
+        <path d="M28 36 Q32 39 36 36" stroke="#03031a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <line x1="32" y1="8" x2="32" y2="14" stroke="#FFD369" stroke-width="1.5"/>
+        <circle cx="32" cy="6" r="2.5" fill="#FFD369">
+          <animate attributeName="r" values="2.5;3.5;2.5" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <div class="signal-label">Aurum AI Decision</div>
+    <div class="ai-hero-sig sig-wait" id="ac-sig">—</div>
+    <div class="ai-hero-sub" id="ac-strat">Analyzing market conditions…</div>
+    <div style="display:flex;justify-content:center;gap:32px;margin-top:24px;flex-wrap:wrap">
+      <div>
+        <div class="metric-label" style="margin-bottom:6px">Confidence</div>
+        <div class="conf-num" id="ac-conf">—</div>
+      </div>
+      <div>
+        <div class="metric-label" style="margin-bottom:6px">Market</div>
+        <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--cyan);text-shadow:0 0 16px rgba(0,229,255,0.4)" id="ac-cond">—</div>
+      </div>
+      <div>
+        <div class="metric-label" style="margin-bottom:6px">Last Analysis</div>
+        <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--text)" id="ac-time">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">AI Reasoning</div>
+      <div class="reasoning-text" id="ac-reason">รอการวิเคราะห์จาก AI...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Trade Setup</div>
+      <div class="detail-row"><span class="d-label">Signal</span><span class="d-val" id="ac-d-sig">—</span></div>
+      <div class="detail-row"><span class="d-label">Strategy</span><span class="d-val" id="ac-d-strat">—</span></div>
+      <div class="detail-row"><span class="d-label">Price</span><span class="d-val gold-val" id="ac-d-price">—</span></div>
+      <div class="detail-row"><span class="d-label">Spread</span><span class="d-val" id="ac-d-spread">—</span></div>
+      <div class="detail-row"><span class="d-label">ATR (14)</span><span class="d-val" id="ac-d-atr">—</span></div>
+      <div class="detail-row"><span class="d-label">Session</span><span class="d-val" id="ac-d-session">—</span></div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <h3>Strategy Engine</h3>
+      <p>AI เลือกกลยุทธ์ที่เหมาะกับสภาพตลาด: Scalp, Intraday, Swing, Recovery, Trend</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <h3>Real-time Signals</h3>
+      <p>ประมวลผล EMA, RSI, ATR ทุก 5 วินาที พร้อมคะแนนความมั่นใจ 0-100%</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🛡️</div>
+      <h3>Risk Aware</h3>
+      <p>AI ปรับ lot size และ SL/TP ตามความผันผวน (ATR) และ margin ที่เหลือ</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MARKET RADAR TAB ===== -->
+<div class="tab-panel" id="tab-radar">
+  <div class="section-hero">
+    <h1>Market Radar</h1>
+    <p>ติดตามราคาและ indicator แบบละเอียด · เซสชั่นตลาดโลก</p>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">XAUUSD Live Chart</div>
+    <div class="chart-wrap" style="height:320px">
+      <canvas id="radarChart" role="img" aria-label="Market radar chart"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Technical Indicators — M5</div>
+      <div class="ind-row"><span class="ind-name">EMA 20</span><div style="display:flex;gap:10px;align-items:center"><span class="ind-val" id="r-ema20">—</span><span class="tag" id="r-t-ema20">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">EMA 50</span><div style="display:flex;gap:10px;align-items:center"><span class="ind-val" id="r-ema50">—</span><span class="tag" id="r-t-ema50">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">RSI (14)</span><div style="display:flex;gap:10px;align-items:center"><span class="ind-val" id="r-rsi">—</span><span class="tag" id="r-t-rsi">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">ATR (14)</span><div style="display:flex;gap:10px;align-items:center"><span class="ind-val" id="r-atr">—</span><span class="tag tag-cyan">VOLATILITY</span></div></div>
+      <div class="ind-row"><span class="ind-name">Trend</span><div style="display:flex;gap:10px;align-items:center"><span class="ind-val" id="r-trend">—</span><span class="tag" id="r-t-trend">—</span></div></div>
+      <div class="ind-row"><span class="ind-name">Spread</span><div style="display:flex;gap:10px;align-items:center"><span class="ind-val" id="r-spread">—</span><span class="tag tag-neu">PTS</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Global Sessions</div>
+      <div class="ind-row"><span class="ind-name">🌏 Asian (02:00–09:00)</span><span class="tag" id="r-s-asian">—</span></div>
+      <div class="ind-row"><span class="ind-name">🌍 London (09:00–14:00)</span><span class="tag" id="r-s-london">—</span></div>
+      <div class="ind-row"><span class="ind-name">🌎 New York (14:00–20:00)</span><span class="tag" id="r-s-ny">—</span></div>
+      <div class="ind-row"><span class="ind-name">🌌 Off-hours</span><span class="tag" id="r-s-off">—</span></div>
+      <div style="margin-top:16px;padding:14px;border-radius:12px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.18)">
+        <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px">Current Session</div>
+        <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--cyan);text-shadow:0 0 14px rgba(0,229,255,0.4)" id="r-cur-session">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== POSITIONS TAB ===== -->
+<div class="tab-panel" id="tab-positions">
+  <div class="section-hero">
+    <h1>Positions</h1>
+    <p>Positions ที่เปิดอยู่ · อัปเดต P&L แบบ real-time</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Open Positions</div>
+    <div id="pos-list"><div class="no-pos">ไม่มี Position ที่เปิดอยู่</div></div>
+  </div>
+</div>
+
+<!-- ===== HISTORY TAB ===== -->
+<div class="tab-panel" id="tab-history">
+  <div class="section-hero">
+    <h1>Trade History</h1>
+    <p>ผลการเทรดย้อนหลัง · สถิติและรายละเอียดทุกดีล</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="metrics" style="margin-bottom:24px;" id="hist-stats">
+    <div class="metric"><div class="metric-label">Trade ทั้งหมด</div><div class="metric-val" id="hs-total">—</div></div>
+    <div class="metric"><div class="metric-label">Win Rate</div><div class="metric-val green-val" id="hs-wr">—</div><div class="metric-sub" id="hs-wl">—</div></div>
+    <div class="metric"><div class="metric-label">กำไรรวม</div><div class="metric-val" id="hs-profit">—</div></div>
+    <div class="metric"><div class="metric-label">Best Strategy</div><div class="metric-val gold-val" id="hs-strat">—</div></div>
+    <div class="metric"><div class="metric-label">Best Session</div><div class="metric-val gold-val" id="hs-sess">—</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Trade History</div>
+    <div style="overflow-x:auto;">
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>เวลาเปิด</th>
+            <th>ทิศทาง</th>
+            <th>Strategy</th>
+            <th>Lot</th>
+            <th>เปิด</th>
+            <th>ปิด</th>
+            <th>Pips</th>
+            <th>P&L</th>
+            <th>Confidence</th>
+            <th>Session</th>
+            <th>ผล</th>
+          </tr>
+        </thead>
+        <tbody id="hist-tbody">
+          <tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-size:10px;">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ANALYTICS TAB ===== -->
+<div class="tab-panel" id="tab-analytics">
+  <div class="section-hero">
+    <h1>Analytics</h1>
+    <p>วิเคราะห์ประสิทธิภาพ · win rate · strategy · session</p>
+  </div>
+
+  <div class="analytics-grid" style="margin-bottom:24px;">
+    <div class="analytics-card">
+      <div class="a-label">Win Rate รวม</div>
+      <div class="a-val green-val" id="an-wr">—</div>
+      <div class="a-sub" id="an-wl">—</div>
+    </div>
+    <div class="analytics-card">
+      <div class="a-label">Avg Profit / Trade</div>
+      <div class="a-val" id="an-avg">—</div>
+    </div>
+    <div class="analytics-card">
+      <div class="a-label">กำไรรวม</div>
+      <div class="a-val" id="an-total">—</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Win Rate by Strategy</div>
+      <div id="strat-breakdown"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Win Rate by Session</div>
+      <div id="sess-breakdown"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">P&L ย้อนหลัง 20 Trade</div>
+    <div class="chart-wrap" style="height:180px;">
+      <canvas id="pnlChart" role="img" aria-label="P&L history chart">P&L chart</canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== RISK CONSOLE TAB ===== -->
+<div class="tab-panel" id="tab-risk">
+  <div class="section-hero">
+    <h1>Risk Console</h1>
+    <p>บริหารความเสี่ยง · margin · drawdown · position sizing</p>
+  </div>
+
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="analytics-card" style="text-align:center">
+      <div class="gauge-ring">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle cx="90" cy="90" r="76" fill="none" stroke="rgba(120,140,230,0.15)" stroke-width="12"/>
+          <circle id="gauge-margin-arc" cx="90" cy="90" r="76" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-dasharray="477" stroke-dashoffset="477" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1); filter: drop-shadow(0 0 8px rgba(0,229,255,0.5))"/>
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#00E5FF"/>
+              <stop offset="100%" stop-color="#B14DFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-val" id="rk-margin-pct">—</div>
+          <div class="gauge-label">Margin Level</div>
+        </div>
+      </div>
+    </div>
+    <div class="analytics-card" style="text-align:center">
+      <div class="gauge-ring">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle cx="90" cy="90" r="76" fill="none" stroke="rgba(120,140,230,0.15)" stroke-width="12"/>
+          <circle id="gauge-exposure-arc" cx="90" cy="90" r="76" fill="none" stroke="url(#gaugeGrad2)" stroke-width="12" stroke-dasharray="477" stroke-dashoffset="477" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1); filter: drop-shadow(0 0 8px rgba(255,211,105,0.5))"/>
+          <defs>
+            <linearGradient id="gaugeGrad2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFD369"/>
+              <stop offset="100%" stop-color="#FF4DB8"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-val" id="rk-exposure-pct" style="background:linear-gradient(120deg,#FFD369,#FF4DB8);-webkit-background-clip:text;background-clip:text;color:transparent">—</div>
+          <div class="gauge-label">Exposure</div>
+        </div>
+      </div>
+    </div>
+    <div class="analytics-card" style="text-align:center">
+      <div class="gauge-ring">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle cx="90" cy="90" r="76" fill="none" stroke="rgba(120,140,230,0.15)" stroke-width="12"/>
+          <circle id="gauge-floating-arc" cx="90" cy="90" r="76" fill="none" stroke="url(#gaugeGrad3)" stroke-width="12" stroke-dasharray="477" stroke-dashoffset="477" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1); filter: drop-shadow(0 0 8px rgba(61,255,168,0.5))"/>
+          <defs>
+            <linearGradient id="gaugeGrad3" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3DFFA8"/>
+              <stop offset="100%" stop-color="#00E5FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-val" id="rk-floating-pct" style="background:linear-gradient(120deg,#3DFFA8,#00E5FF);-webkit-background-clip:text;background-clip:text;color:transparent">—</div>
+          <div class="gauge-label">Floating P&L</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Account Summary</div>
+      <div class="detail-row"><span class="d-label">Balance</span><span class="d-val gold-val" id="rk-bal">—</span></div>
+      <div class="detail-row"><span class="d-label">Equity</span><span class="d-val" id="rk-eq">—</span></div>
+      <div class="detail-row"><span class="d-label">Floating P&L</span><span class="d-val" id="rk-fl">—</span></div>
+      <div class="detail-row"><span class="d-label">Free Margin</span><span class="d-val" id="rk-free">—</span></div>
+      <div class="detail-row"><span class="d-label">Open Positions</span><span class="d-val" id="rk-pos">—</span></div>
+      <div class="detail-row"><span class="d-label">Total Lot Size</span><span class="d-val" id="rk-lot">—</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Risk Status</div>
+      <div id="rk-status">
+        <div class="no-pos" style="padding:24px 16px">กำลังประเมินความเสี่ยง...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="feat-card">
+      <div class="feat-icon" style="background:linear-gradient(135deg,rgba(61,255,168,0.15),rgba(0,229,255,0.15));border-color:rgba(61,255,168,0.3)">✓</div>
+      <h3>Safe Zone</h3>
+      <p>Margin Level &gt; 500% · Exposure &lt; 30% · AI ทำงานได้เต็มประสิทธิภาพ</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:linear-gradient(135deg,rgba(255,211,105,0.15),rgba(255,184,77,0.15));border-color:rgba(255,211,105,0.3)">!</div>
+      <h3>Caution</h3>
+      <p>Margin 200-500% · AI ลด lot size · ระวังการเปิด position ใหม่</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:linear-gradient(135deg,rgba(255,94,122,0.15),rgba(255,77,184,0.15));border-color:rgba(255,94,122,0.3)">⚠</div>
+      <h3>Danger</h3>
+      <p>Margin &lt; 200% · AI หยุดเปิด position ใหม่ · พิจารณาปิดบาง deal</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer" id="footer">AURUM AI · XAUUSD GALACTIC INTELLIGENCE · —</div>
+</div>
+</div>
+</section>
+
 <!-- ========== FOOTER ========== -->
 <footer class="footer">
   <div class="footer-inner">
@@ -1315,7 +2338,8 @@ body::before {
     <div class="footer-col">
       <h4>Product</h4>
       <ul>
-        <li><a href="#features">Features</a></li>
+        <li><a href="#dashboard" data-nav="dashboard">Dashboard</a></li>
+        <li><a href="#features" data-nav="landing">Features</a></li>
         <li><a href="#pricing">Pricing</a></li>
         <li><a href="#demo">Demo</a></li>
         <li><a href="#" onclick="return false">API Docs</a></li>
@@ -1353,5 +2377,401 @@ body::before {
 
 </div>
 
+<script>
+
+const BRIDGE = "https://xauusd-bridge-production.up.railway.app/data";
+const STATS  = "https://xauusd-bridge-production.up.railway.app/stats?symbol=XAUUSD.cent";
+
+const ph = { labels: [], data: [] };
+let priceChart, pnlChart;
+let allTrades = [];
+
+// Tab switching
+const TAB_NAMES = ['overview','aicore','radar','positions','history','analytics','risk'];
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', TAB_NAMES[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('tab-' + name);
+  if(panel) panel.classList.add('active');
+  if(name === 'history' || name === 'analytics') loadHistory();
+}
+
+// Helpers
+const fmt = n => n ? '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+const fmtP = n => (n>=0?'+$':'-$') + Math.abs(n).toFixed(2);
+const fmtMono = n => n ? n.toFixed(2) : '—';
+const $ = id => document.getElementById(id);
+
+function setTag(id, text, cls) {
+  const el = $(id); if(!el) return;
+  el.textContent = text;
+  el.className = 'tag ' + cls;
+}
+
+let radarChart;
+function initCharts() {
+  const axisColor = '#5A6199';
+  const gridColor = 'rgba(120,140,230,0.08)';
+  const opts = {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: axisColor, font: { size: 10 }, maxTicksLimit: 6 }, grid: { color: gridColor, drawBorder: false } },
+      y: { ticks: { color: axisColor, font: { size: 10 }, callback: v => '$'+v.toFixed(0) }, grid: { color: gridColor, drawBorder: false } }
+    }
+  };
+  const ctx = $('priceChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 220);
+  grad.addColorStop(0, 'rgba(0,229,255,0.35)');
+  grad.addColorStop(1, 'rgba(177,77,255,0.02)');
+  priceChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: ph.labels, datasets: [{ data: ph.data, borderColor: '#00E5FF', backgroundColor: grad, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.35 }] },
+    options: opts
+  });
+
+  const rc = $('radarChart');
+  if (rc) {
+    const rctx = rc.getContext('2d');
+    const rgrad = rctx.createLinearGradient(0, 0, 0, 320);
+    rgrad.addColorStop(0, 'rgba(255,211,105,0.35)');
+    rgrad.addColorStop(1, 'rgba(255,77,184,0.02)');
+    radarChart = new Chart(rctx, {
+      type: 'line',
+      data: { labels: ph.labels, datasets: [{ data: ph.data, borderColor: '#FFD369', backgroundColor: rgrad, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.35 }] },
+      options: opts
+    });
+  }
+}
+
+function updateUI(d) {
+  $('live-dot').className = 'live-dot on';
+  $('live-text').textContent = 'Live';
+  $('h-price').textContent = d.bid ? '$' + d.bid.toFixed(2) : '—';
+
+  // Metrics
+  const fl = (d.equity||0) - (d.balance||0);
+  $('m-bal').textContent   = fmt(d.balance);
+  $('m-eq').textContent    = fmt(d.equity);
+  $('m-float').textContent = fmtP(fl);
+  $('m-float').className   = 'metric-val ' + (fl>=0?'green-val':'red-val');
+  $('m-margin').textContent = fmt(d.free_margin);
+  $('m-pos').textContent   = (d.positions||[]).length;
+
+  // AI
+  const ai = d.ai || {};
+  const sig = ai.signal || 'WAIT';
+  $('sig-val').textContent = sig;
+  $('sig-val').className   = 'signal-val ' + (sig==='BUY'?'sig-buy':sig==='SELL'?'sig-sell':'sig-wait');
+  $('sig-strat').textContent = ai.strategy || '—';
+  const conf = ai.confidence || 0;
+  $('sig-conf').textContent = conf + '%';
+  $('conf-bar').style.width = conf + '%';
+  // conf-bar uses CSS gradient, keep it
+  $('sig-time').textContent = ai.last_analysis ? 'วิเคราะห์: ' + ai.last_analysis : '—';
+  $('ai-reason').textContent = ai.reasoning || '—';
+  $('d-cond').textContent   = ai.market_condition || '—';
+  $('d-price').textContent  = d.bid ? '$' + d.bid.toFixed(2) : '—';
+  $('d-spread').textContent = d.spread ? d.spread + ' pts' : '—';
+  $('d-atr').textContent    = d.atr ? d.atr.toFixed(2) : '—';
+
+  const ts = d.timestamp || 0;
+  const h = ts ? new Date(ts*1000).getHours() : 0;
+  $('d-session').textContent = h>=2&&h<9?'Asian':h>=9&&h<14?'London':h>=14&&h<20?'New York':'Off-hours';
+
+  // Indicators
+  const bull = d.ema20 > d.ema50;
+  $('i-ema20').textContent = fmtMono(d.ema20);
+  $('i-ema50').textContent = fmtMono(d.ema50);
+  $('i-rsi').textContent   = d.rsi ? d.rsi.toFixed(1) : '—';
+  $('i-atr').textContent   = fmtMono(d.atr);
+  $('i-trend').textContent = bull ? 'EMA Cross UP' : 'EMA Cross DOWN';
+  setTag('t-ema20', bull?'BULL':'BEAR', bull?'tag-bull':'tag-bear');
+  setTag('t-ema50', bull?'BULL':'BEAR', bull?'tag-bull':'tag-bear');
+  const r = d.rsi||50;
+  setTag('t-rsi', r>70?'OVERBOUGHT':r<30?'OVERSOLD':'NORMAL', r>70?'tag-bear':r<30?'tag-bull':'tag-neu');
+  setTag('t-trend', bull?'UPTREND':'DOWNTREND', bull?'tag-bull':'tag-bear');
+
+  // Positions
+  const pl = $('pos-list');
+  const positions = d.positions || [];
+  if(!positions.length) {
+    pl.innerHTML = '<div class="no-pos">No Open Positions</div>';
+  } else {
+    pl.innerHTML = positions.map(p => `
+      <div class="pos-item">
+        <div>
+          <div class="pos-type ${p.type==='BUY'?'green-val':'red-val'}">${p.type} · ${p.lots} lot</div>
+          <div class="pos-info">Entry: $${p.open.toFixed(2)} · SL: $${p.sl.toFixed(2)} · TP: $${p.tp.toFixed(2)}</div>
+        </div>
+        <div class="pos-pnl ${p.profit>=0?'green-val':'red-val'}">${fmtP(p.profit)}</div>
+      </div>`).join('');
+  }
+
+  // Price chart
+  const now = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  ph.labels.push(now); ph.data.push(parseFloat(d.bid));
+  if(ph.labels.length > 80) { ph.labels.shift(); ph.data.shift(); }
+  if(priceChart) priceChart.update('none');
+  if(radarChart) radarChart.update('none');
+
+  const session = h>=2&&h<9?'Asian':h>=9&&h<14?'London':h>=14&&h<20?'New York':'Off-hours';
+
+  // AI Core tab
+  if($('ac-sig')) {
+    $('ac-sig').textContent = sig;
+    $('ac-sig').className = 'ai-hero-sig ' + (sig==='BUY'?'sig-buy':sig==='SELL'?'sig-sell':'sig-wait');
+    $('ac-strat').textContent = ai.strategy ? 'Strategy: ' + ai.strategy : '—';
+    $('ac-conf').textContent = conf + '%';
+    $('ac-cond').textContent = ai.market_condition || '—';
+    $('ac-time').textContent = ai.last_analysis || '—';
+    $('ac-reason').textContent = ai.reasoning || 'รอการวิเคราะห์จาก AI...';
+    $('ac-d-sig').textContent = sig;
+    $('ac-d-strat').textContent = ai.strategy || '—';
+    $('ac-d-price').textContent = d.bid ? '$' + d.bid.toFixed(2) : '—';
+    $('ac-d-spread').textContent = d.spread ? d.spread + ' pts' : '—';
+    $('ac-d-atr').textContent = d.atr ? d.atr.toFixed(2) : '—';
+    $('ac-d-session').textContent = session;
+  }
+
+  // Market Radar tab
+  if($('r-ema20')) {
+    $('r-ema20').textContent = fmtMono(d.ema20);
+    $('r-ema50').textContent = fmtMono(d.ema50);
+    $('r-rsi').textContent = d.rsi ? d.rsi.toFixed(1) : '—';
+    $('r-atr').textContent = fmtMono(d.atr);
+    $('r-trend').textContent = bull ? 'EMA Cross UP' : 'EMA Cross DOWN';
+    $('r-spread').textContent = d.spread ? d.spread : '—';
+    setTag('r-t-ema20', bull?'BULL':'BEAR', bull?'tag-bull':'tag-bear');
+    setTag('r-t-ema50', bull?'BULL':'BEAR', bull?'tag-bull':'tag-bear');
+    setTag('r-t-rsi', r>70?'OVERBOUGHT':r<30?'OVERSOLD':'NORMAL', r>70?'tag-bear':r<30?'tag-bull':'tag-neu');
+    setTag('r-t-trend', bull?'UPTREND':'DOWNTREND', bull?'tag-bull':'tag-bear');
+    const sessions = {asian: h>=2&&h<9, london: h>=9&&h<14, ny: h>=14&&h<20, off: !(h>=2&&h<20)};
+    setTag('r-s-asian', sessions.asian?'ACTIVE':'CLOSED', sessions.asian?'tag-cyan':'tag-neu');
+    setTag('r-s-london', sessions.london?'ACTIVE':'CLOSED', sessions.london?'tag-cyan':'tag-neu');
+    setTag('r-s-ny', sessions.ny?'ACTIVE':'CLOSED', sessions.ny?'tag-cyan':'tag-neu');
+    setTag('r-s-off', sessions.off?'ACTIVE':'CLOSED', sessions.off?'tag-cyan':'tag-neu');
+    $('r-cur-session').textContent = session;
+  }
+
+  // Risk Console tab
+  if($('rk-bal')) {
+    const bal = d.balance||0, eq = d.equity||0, free = d.free_margin||0;
+    const marginUsed = eq - free;
+    const marginLvl = marginUsed > 0 ? (eq / marginUsed * 100) : 9999;
+    const exposure = bal > 0 ? Math.min((marginUsed / bal) * 100, 100) : 0;
+    const totalLot = positions.reduce((s,p) => s + (p.lots||0), 0);
+
+    $('rk-bal').textContent = fmt(bal);
+    $('rk-eq').textContent = fmt(eq);
+    $('rk-fl').textContent = fmtP(fl);
+    $('rk-fl').className = 'd-val ' + (fl>=0?'green-val':'red-val');
+    $('rk-free').textContent = fmt(free);
+    $('rk-pos').textContent = positions.length;
+    $('rk-lot').textContent = totalLot.toFixed(2) + ' lot';
+
+    // Gauges (arc length = 477)
+    const mPct = marginLvl >= 1000 ? 100 : (marginLvl/1000)*100;
+    $('rk-margin-pct').textContent = marginLvl > 9998 ? '∞' : Math.round(marginLvl) + '%';
+    $('gauge-margin-arc').style.strokeDashoffset = 477 - (477 * mPct / 100);
+
+    $('rk-exposure-pct').textContent = exposure.toFixed(0) + '%';
+    $('gauge-exposure-arc').style.strokeDashoffset = 477 - (477 * exposure / 100);
+
+    const flPct = bal > 0 ? Math.min(Math.abs(fl) / bal * 100, 100) : 0;
+    $('rk-floating-pct').textContent = (fl>=0?'+':'-') + flPct.toFixed(1) + '%';
+    $('gauge-floating-arc').style.strokeDashoffset = 477 - (477 * flPct / 100);
+
+    // Status
+    const rkStatus = $('rk-status');
+    let status = 'safe', msg = 'พอร์ตของคุณอยู่ในโซนปลอดภัย AI ทำงานได้เต็มประสิทธิภาพ', color = 'var(--green)';
+    if (marginLvl < 200) { status='danger'; msg='Margin Level ต่ำเกินไป! AI หยุดเปิด position ใหม่ พิจารณาปิดบางดีล'; color='var(--red)'; }
+    else if (marginLvl < 500 || exposure > 50) { status='caution'; msg='ควรระวัง · AI ลด lot size ลงแล้ว · หลีกเลี่ยงการเปิด position เพิ่ม'; color='var(--gold2)'; }
+    rkStatus.innerHTML = `
+      <div style="padding:24px;border-radius:14px;background:linear-gradient(135deg, ${color.replace('var(--','rgba(').replace(')', ',0.12)')}, transparent);border:1px solid ${color.replace('var(--','rgba(').replace(')', ',0.35)')}">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:32px;color:${color};letter-spacing:2px;text-transform:uppercase">${status.toUpperCase()}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.7">${msg}</div>
+      </div>`;
+  }
+
+  $('footer').textContent = 'AURUM AI · XAUUSD · Updated ' + now;
+}
+
+async function loadHistory() {
+  try {
+    const r = await fetch(STATS);
+    const data = await r.json();
+    allTrades = data.trades || [];
+
+    // History stats
+    const wr = data.win_rate || 0;
+    $('hs-total').textContent = data.total || 0;
+    $('hs-wr').textContent = wr.toFixed(1) + '%';
+    $('hs-wr').className = 'metric-val ' + (wr>=60?'green-val':wr>=40?'gold-val':'red-val');
+    $('hs-wl').textContent = (data.wins||0) + 'W / ' + (data.losses||0) + 'L';
+    $('hs-profit').textContent = fmtP(data.total_profit||0);
+    $('hs-profit').className = 'metric-val ' + ((data.total_profit||0)>=0?'green-val':'red-val');
+
+    // Best strategy
+    const strats = {};
+    const sessions = {};
+    allTrades.forEach(t => {
+      const s = t.strategy||'UNKNOWN';
+      if(!strats[s]) strats[s] = {w:0,t:0};
+      strats[s].t++; if(t.win) strats[s].w++;
+      const ss = t.session||'Unknown';
+      if(!sessions[ss]) sessions[ss] = {w:0,t:0};
+      sessions[ss].t++; if(t.win) sessions[ss].w++;
+    });
+    let bestStrat = '—', bestStratWr = 0;
+    Object.entries(strats).forEach(([s,d]) => { const w = d.w/d.t*100; if(w>bestStratWr){bestStratWr=w;bestStrat=s;} });
+    let bestSess = '—', bestSessWr = 0;
+    Object.entries(sessions).forEach(([s,d]) => { const w = d.w/d.t*100; if(w>bestSessWr){bestSessWr=w;bestSess=s;} });
+    $('hs-strat').textContent = bestStrat;
+    $('hs-sess').textContent = bestSess;
+
+    // History table
+    const tbody = $('hist-tbody');
+    if(!allTrades.length) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3);font-size:10px;letter-spacing:1px;text-transform:uppercase;">No Trade History Yet</td></tr>';
+    } else {
+      tbody.innerHTML = allTrades.map(t => {
+        const strat = t.strategy||'UNKNOWN';
+        const sc = strat==='SCALP'?'st-scalp':strat==='INTRADAY'?'st-intraday':strat==='SWING'?'st-swing':strat==='RECOVERY'?'st-recovery':'st-trend';
+        const conf = t.confidence||0;
+        const confColor = conf>=75?'#3DFFA8':conf>=50?'#FFD369':'#FF5E7A';
+        const pips = t.pips||0;
+        const profit = t.profit||0;
+        const dt = t.open_time ? new Date(t.open_time) : null;
+        const timeStr = dt ? dt.toLocaleDateString('th-TH',{month:'short',day:'numeric'})+' '+dt.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '—';
+        return `<tr>
+          <td style="color:var(--text3);font-family:'DM Mono',monospace">${timeStr}</td>
+          <td style="font-family:'DM Mono',monospace;color:${t.type==='BUY'?'#3DFFA8':'#FF5E7A'};font-weight:500">${t.type||'—'}</td>
+          <td><span class="strat-tag ${sc}">${strat}</span></td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text2)">${(t.lots||0).toFixed(2)}</td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text2)">${(t.open_price||0).toFixed(2)}</td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text2)">${(t.close_price||0).toFixed(2)}</td>
+          <td style="font-family:'DM Mono',monospace;color:${pips>=0?'#3DFFA8':'#FF5E7A'}">${pips>=0?'+':''}${pips.toFixed(1)}</td>
+          <td style="font-family:'DM Mono',monospace;color:${profit>=0?'#3DFFA8':'#FF5E7A'};font-weight:500">${fmtP(profit)}</td>
+          <td style="font-family:'DM Mono',monospace;color:${confColor}">${conf}%</td>
+          <td style="color:var(--text3)">${t.session||'—'}</td>
+          <td><span class="win-tag ${t.win?'win-yes':'win-no'}">${t.win?'WIN':'LOSS'}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Analytics
+    $('an-wr').textContent = wr.toFixed(1) + '%';
+    $('an-wl').textContent = (data.wins||0) + ' Wins / ' + (data.losses||0) + ' Losses';
+    const avgP = allTrades.length ? (data.total_profit||0) / allTrades.length : 0;
+    $('an-avg').textContent = fmtP(avgP);
+    $('an-avg').className = 'a-val ' + (avgP>=0?'green-val':'red-val');
+    $('an-total').textContent = fmtP(data.total_profit||0);
+    $('an-total').className = 'a-val ' + ((data.total_profit||0)>=0?'green-val':'red-val');
+
+    // Strategy breakdown
+    $('strat-breakdown').innerHTML = Object.entries(strats).map(([s,d]) => {
+      const w = d.t > 0 ? d.w/d.t*100 : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+        <span style="font-size:11px;color:var(--text2)">${s}</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:80px;height:2px;background:var(--bg4);border-radius:1px;overflow:hidden"><div style="height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));width:${w}%"></div></div>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${w>=60?'#3DFFA8':w>=40?'#FFD369':'#FF5E7A'}">${w.toFixed(0)}%</span>
+          <span style="font-size:10px;color:var(--text3)">${d.t} trades</span>
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:20px;text-align:center;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1px">No Data</div>';
+
+    // Session breakdown
+    $('sess-breakdown').innerHTML = Object.entries(sessions).map(([s,d]) => {
+      const w = d.t > 0 ? d.w/d.t*100 : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+        <span style="font-size:11px;color:var(--text2)">${s}</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:80px;height:2px;background:var(--bg4);border-radius:1px;overflow:hidden"><div style="height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));width:${w}%"></div></div>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:${w>=60?'#3DFFA8':w>=40?'#FFD369':'#FF5E7A'}">${w.toFixed(0)}%</span>
+          <span style="font-size:10px;color:var(--text3)">${d.t} trades</span>
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:20px;text-align:center;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1px">No Data</div>';
+
+    // P&L chart
+    const last20 = allTrades.slice(0,20).reverse();
+    if(last20.length > 0) {
+      const pnlData = last20.map(t => t.profit||0);
+      const pnlLabels = last20.map((_,i) => '#'+(i+1));
+      const pnlColors = pnlData.map(v => v>=0?'#3DFFA8':'#FF5E7A');
+      if(pnlChart) pnlChart.destroy();
+      pnlChart = new Chart($('pnlChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: pnlLabels, datasets: [{ data: pnlData, backgroundColor: pnlColors, borderRadius: 6, borderSkipped: false }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color:'#5A6199',font:{size:10} }, grid: { color:'rgba(120,140,230,0.08)', drawBorder: false } },
+            y: { ticks: { color:'#5A6199',font:{size:10},callback:v=>'$'+v.toFixed(0) }, grid: { color:'rgba(120,140,230,0.08)', drawBorder: false } }
+          }
+        }
+      });
+    }
+
+  } catch(e) {
+    console.log('History error:', e);
+  }
+}
+
+async function poll() {
+  try {
+    const r = await fetch(BRIDGE);
+    if(!r.ok) throw new Error();
+    const d = await r.json();
+    if(d.bid > 0) updateUI(d);
+  } catch {
+    $('live-dot').className = 'live-dot';
+    $('live-text').textContent = 'Offline';
+  }
+}
+
+// Auto-run deferred until Dashboard view is opened
+let _dashboardInitialized = false;
+window.initDashboardOnce = function() {
+  if (_dashboardInitialized) return;
+  _dashboardInitialized = true;
+  try { initCharts(); } catch(e) { console.warn('initCharts:', e); }
+  try { poll(); } catch(e) {}
+  try { loadHistory(); } catch(e) {}
+  setInterval(poll, 5000);
+  setInterval(loadHistory, 60000);
+};
+
+</script>
+<script>
+// ========== Dashboard / Landing view toggle ==========
+function showDashboard() {
+  document.body.classList.add('dashboard-mode');
+  history.replaceState(null, '', '#dashboard');
+  window.scrollTo(0,0);
+  // init dashboard on first show
+  if (typeof initDashboardOnce === 'function') initDashboardOnce();
+}
+function showLanding() {
+  document.body.classList.remove('dashboard-mode');
+  history.replaceState(null, '', '#');
+  window.scrollTo(0,0);
+}
+window.addEventListener('DOMContentLoaded', () => {
+  if (location.hash === '#dashboard') showDashboard();
+  // Wire up dashboard link
+  document.querySelectorAll('a[data-nav="dashboard"]').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); showDashboard(); });
+  });
+  document.querySelectorAll('a[data-nav="landing"]').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); showLanding(); });
+  });
+});
+</script>
 </body>
 </html>
