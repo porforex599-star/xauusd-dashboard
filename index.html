@@ -831,11 +831,11 @@ body::before {
 /* Dashboard view toggle */
 #dashboard-view { display: none; }
 body.dashboard-mode #dashboard-view { display: block !important; }
-body.dashboard-mode .main > section:not(#dashboard-view),
-body.dashboard-mode .hero,
-body.dashboard-mode > footer.footer { display: none !important; }
-/* Keep navbar visible so user can switch back to landing */
-body.dashboard-mode .main { padding: 0 !important; max-width: none !important; }
+/* Hide all direct children of LANDING's main (body > .main), not dashboard's inner .main */
+body.dashboard-mode > .main > *:not(#dashboard-view) { display: none !important; }
+body.dashboard-mode .hero { display: none !important; }
+/* Remove landing main's padding so dashboard fills width */
+body.dashboard-mode > .main { padding: 0 !important; max-width: none !important; }
 /* Dashboard view inherits dark bg but keep landing's star background */
 #dashboard-view { font-size: 13px; }
 #dashboard-view .app { position: relative; z-index: 1; }
@@ -948,8 +948,8 @@ body.dashboard-mode .nav-links a[data-nav="dashboard"] {
 #dashboard-view .tab-icon { font-size: 14px; line-height: 1; }
 
 #dashboard-view .main { padding: 36px 40px; max-width: 1480px; margin: 0 auto; }
-#dashboard-view .tab-panel { display: none; animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-#dashboard-view .tab-panel.active { display: block; }
+#dashboard-view .tab-panel { display: none; }
+#dashboard-view .tab-panel.active { display: block !important; opacity: 1 !important; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
 #dashboard-view .section-hero { margin-bottom: 32px; }
